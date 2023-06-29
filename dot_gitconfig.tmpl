@@ -4,3 +4,6 @@
 	signingkey = {{ .email}}
 [commit]
 	gpgsign = true
+[github]
+	signingkey = {{ .email}}
+	token = {{ pass "github/api/token" }}
