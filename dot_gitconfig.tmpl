@@ -1,5 +1,5 @@
 [user]
-	email = {{ .email }} 
+	email = {{ .email | quote}} 
 	name = {{ .name}}
 	signingkey = {{ .email}}
 [commit]
