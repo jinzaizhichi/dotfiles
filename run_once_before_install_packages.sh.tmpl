@@ -1,0 +1,34 @@
+#!/bin/bash
+
+
+read -p "enter 'y' to continue,other to abort:" CONF
+
+if [["$CONF" == "y"]]; then
+  echo 'continue'
+else
+  echo 'abort'
+  exit
+fi
+
+
+{{if eq .chezmoi.osRelease.id "arch"}}
+sudo pacman -S neovim
+sudo pacman -S --needed git base-devel
+git clone https://aur.archlinux.ort/yay.git
+cd yay
+makepkg -si
+cd ~
+
+ssh-add
+{{end}}
+
+{{if eq .chezmoi.osRelease.id "amzn"}}
+sudo yum update
+sudo yum install git base-devel
+git clone https://github.com/neovim/neovim.git
+cd neovim
+make CMAKE_BUILD_TYPE=Release
+sudo make install
+
+
+{{end}}
