@@ -107,9 +107,10 @@ source $ZSH/oh-my-zsh.sh
 alias aws="AWS_ACCESS_KEY_ID=$(pass show aws/jinzaizhichi/aws_access_key_id) AWS_SECRET_ACCESS_KEY=$(pass show aws/jinzaizhichi/aws_secret_access_key)  aws"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+alias vimdiff='nvim -d'
 export EDITOR='nvim'
 
-source /home/jinzaizhichi/.config/broot/launcher/bash/br
+#source /home/jinzaizhichi/.config/broot/launcher/bash/br
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
