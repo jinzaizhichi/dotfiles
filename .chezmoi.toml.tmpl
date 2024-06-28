@@ -2,8 +2,11 @@
       email = "jinzaizhichi9888@gmail.com"
       name  = "jinzaizhichi"
 
-[gpg]      
+[gpg]
       recipient = "jinzaizhichi9888@gmail.com"
 [git]
-      autoCommit =true
+     # autoCommit =true
       # autoPush = true
+[merge]
+    command = "nvim"
+    args = ["-d", "{{ .Destination }}", "{{ .Source }}", "{{ .Target }}"]
