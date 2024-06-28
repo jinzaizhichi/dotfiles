@@ -1,0 +1,29 @@
+[1mdiff --git a/.gitconfig b/.gitconfig
+index 30bfb89840d111c4296d994a07b00e7de2a71b83..6f822168e2448c9527e743132f497bd82526cafc 100644
+--- a/.gitconfig
++++ b/.gitconfig[m
+[36m@@ -1,5 +1,5 @@[m
+ [user]
+[31m-	email = "jinzaizhichi9888@gmail.com" [m
+[32m+	email = "jinzaizhichi9888@gmail.com"[m
+ 	name = jinzaizhichi
+ 	signingkey = jinzaizhichi9888@gmail.com
+ [commit]
+[36m@@ -7,3 +7,17 @@[m 	gpgsign = true
+ [github]
+ 	signingkey = jinzaizhichi9888@gmail.com
+ 	token = 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
+[32m+[core][m
+[32m+    pager = delta[m
+[32m+[m
+[32m+[interactive][m
+[32m+    diffFilter = delta --color-only[m
+[32m+[m
+[32m+[delta][m
+[32m+    navigate = true[m
+[32m+[m
+[32m+[merge][m
+[32m+    conflictstyle = diff3[m
+[32m+[m
+[32m+[diff][m
+[32m+    colorMoved = default[m
