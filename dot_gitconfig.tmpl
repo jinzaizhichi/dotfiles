@@ -1,5 +1,5 @@
 [user]
-	email = {{ .email | quote}} 
+	email = {{ .email | quote}}
 	name = {{ .name}}
 	signingkey = {{ .email}}
 [commit]
@@ -7,3 +7,17 @@
 [github]
 	signingkey = {{ .email}}
 	token = {{ pass "github/api/token" }}
+[core]
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
