@@ -1,21 +1,15 @@
 #!/bin/bash
 
 
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-
 
 {{if eq .chezmoi.osRelease.id "arch"}}
 pacman -S --noconfirm neovim
-pacman -S --noconfirm --needed git base-devel
-git clone https://aur.archlinux.ort/yay.git
-cd yay
-makepkg -si
-cd ~
+pacman -S --noconfirm --needed  base-devel
 
-ssh-add
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
 {{end}}
-
 {{if eq .chezmoi.osRelease.id "amzn"}}
 sudo yum update
 sudo yum install git base-devel
