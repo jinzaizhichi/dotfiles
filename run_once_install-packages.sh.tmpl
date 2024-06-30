@@ -12,8 +12,8 @@ fi
 
 
 {{if eq .chezmoi.osRelease.id "arch"}}
-sudo pacman -S neovim
-sudo pacman -S --needed git base-devel
+pacman -S neovim
+pacman -S --needed git base-devel
 git clone https://aur.archlinux.ort/yay.git
 cd yay
 makepkg -si
