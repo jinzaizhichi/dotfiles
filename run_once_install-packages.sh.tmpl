@@ -1,14 +1,10 @@
 #!/bin/bash
 
 
-read -p "enter 'y' to continue,other to abort:" CONF
 
-if [["$CONF" == "y"]]; then
-  echo 'continue'
-else
-  echo 'abort'
-  exit
-fi
+git clone https://github.com/jinzaizhichi/.password-store.git
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
 
 {{if eq .chezmoi.osRelease.id "arch"}}
