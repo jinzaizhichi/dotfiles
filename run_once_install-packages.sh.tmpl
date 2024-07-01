@@ -6,7 +6,6 @@
 pacman -S --noconfirm neovim
 pacman -S --noconfirm --needed  base-devel
 git clone git@github.com:jinzaizhichi/starter ~/.config/nvim
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 {{end}}
 {{if eq .chezmoi.osRelease.id "amzn"}}
@@ -17,5 +16,6 @@ cd neovim
 make CMAKE_BUILD_TYPE=Release
 sudo make install
 
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 {{end}}
