@@ -143,6 +143,4 @@ OPENAI_API_KEY=$(pass show openai/api)
 export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
 GEMINI_API_KEY=$(pass show gemini_api_key)
 export PATH="/home/jinzaizhichi/.local/bin:$PATH"
-export GEMINI_API_KEY="AIzaSyDyigv9XdY2p8lfQWwlxtoxUPvCD3zoNTI"
-. "/home/jinzaizhichi/.deno/env"
 export PATH="/home/jinzaizhichi/.cargo/bin:$PATH"
