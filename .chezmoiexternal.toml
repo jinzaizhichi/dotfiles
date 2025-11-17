@@ -8,4 +8,4 @@
     url = "https://github.com/ohmyzsh/ohmyzsh/archive/master.tar.gz"
     exact = false
     stripComponents = 0
-    refreshPeriod = "1w"
+    refreshPeriod = "168h"
