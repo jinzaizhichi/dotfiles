@@ -32,7 +32,8 @@ ZSH_THEME="robbyrussell"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode auto      # update automatically without asking
+
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
@@ -120,7 +121,7 @@ setopt HIST_IGNORE_SPACE
 bindkey '^j' autosuggest-accept
 bindkey '^k' autosuggest-execute
 bindkey -s '\e\e' '\C-asudo \C-e'
-
+bindkey '^x' kill-line #将Ctrl+x绑定到删除光标到行尾
 source /home/jinzaizhichi/.config/broot/launcher/bash/br
 
 eval "$(fasd --init auto)"
@@ -138,3 +139,10 @@ source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
  typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 eval "$(atuin init zsh)"
+OPENAI_API_KEY=$(pass show openai/api)
+export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
+GEMINI_API_KEY=$(pass show gemini_api_key)
+export PATH="/home/jinzaizhichi/.local/bin:$PATH"
+export GEMINI_API_KEY="AIzaSyDyigv9XdY2p8lfQWwlxtoxUPvCD3zoNTI"
+. "/home/jinzaizhichi/.deno/env"
+export PATH="/home/jinzaizhichi/.cargo/bin:$PATH"
