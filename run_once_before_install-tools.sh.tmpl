@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# 统一的 chezmoi 脚本，用于安装系统依赖和基础工具
+# ---------------------------------------------------
+
+# 1. 软件包安装和依赖处理
+{{ if eq .chezmoi.osRelease.id "arch" -}}
+echo "--- Installing dependencies on Arch Linux ---"
+# -Sy: 更新软件包列表
+# -S: 安装软件包 (zsh, git, unzip, openssh, pass)
+# -Sc: 清理缓存
+pacman -Sy --noconfirm
+pacman -S --noconfirm --needed zsh git unzip openssh pass
+
+# ---------------------------------------------------
+{{- else if eq .chezmoi.osRelease.id "ubuntu" -}}
+echo "--- Installing dependencies on Ubuntu ---"
+# Ubuntu (Debian-like) 使用 apt
+sudo apt update
+# -y: 自动回答 yes
+sudo apt install -y zsh git unzip openssh-client password-store
+
+# ---------------------------------------------------
+{{- else if eq .chezmoi.osRelease.id "amzn" -}}
+echo "--- Installing dependencies on Amazon Linux ---"
+# Amazon Linux (RHEL/CentOS-like)
+sudo yum update -y
+# 安装 zsh, git, base-devel (用于编译 pass)
+sudo yum install zsh git base-devel -y
+
+# 安装 pass (Password Store) - 从源码编译
+echo "--- Installing pass from source on Amazon Linux ---"
+# 在 Amazon Linux 上，'pass' 包名可能是 'password-store' 或需要手动编译
+if ! command -v pass &> /dev/null; then
+    if [ ! -d "/usr/local/bin/password-store" ]; then
+        git clone https://git.zx2c4.com/password-store /tmp/password-store
+        # 确保安装了 gpg, make, tree 等 pass 依赖项
+        sudo yum install -y gpg2 make tree
+        (cd /tmp/password-store && sudo make install)
+        rm -rf /tmp/password-store
+    else
+        echo "pass seems already installed (via source)."
+    fi
+fi
+
+# ---------------------------------------------------
+{{- end }}
+
+# 2. 克隆您的密码存储库
+echo "--- Cloning .password-store repository ---"
+if [ ! -d "$HOME/.password-store" ]; then
+    git clone https://github.com/jinzaizhichi/.password-store.git "$HOME/.password-store"
+else
+    echo ".password-store already found, skipping clone."
+fi
+
+# 3. 安装 Oh My Zsh 和插件
+echo "--- Checking for Oh My Zsh installation ---"
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+	echo "Getting Oh My Zsh (ohmyz.sh)..."
+	# --unattended: 自动安装, 不会提示修改默认 shell
+	# --keep-zshrc: 保留已存在的 .zshrc
+	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc --skip-chsh
+
+	echo "Getting zsh-autosuggestions plugin..."
+	git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+else
+	echo ".oh-my-zsh already found, skipping installation."
+fi
