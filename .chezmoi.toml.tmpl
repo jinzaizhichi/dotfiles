@@ -1,14 +1,8 @@
-{{- $isWSL := false -}}
-{{- $isLinux := eq .chezmoi.os "linux" -}}
-{{- if $isLinux -}}
-{{-   $isWSL = lookPath "wsl.exe" -}}
-{{- end -}}
-
 [data]
     email = "jinzaizhichi9888@gmail.com"
     name = "jinzaizhichi"
     gpgKey = "jinzaizhichi9888@gmail.com"
-    isWSL = {{ $isWSL }}
+    isWSL = {{ and (eq .chezmoi.os "linux") (lookPath "wsl.exe") }}
     isArch = {{ eq .chezmoi.osRelease.id "arch" }}
     isUbuntu = {{ eq .chezmoi.osRelease.id "ubuntu" }}
     isMac = {{ eq .chezmoi.os "darwin" }}
