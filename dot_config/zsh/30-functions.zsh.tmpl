@@ -1,5 +1,4 @@
 # 清除 Oh My Zsh Git 插件的 alias 冲突
-unalias gco-fzf 2>/dev/null
 
 # 清除可能的外部 alias 冲突
 unalias gcam 2>/dev/null
@@ -97,13 +96,6 @@ gcap() {
 }
 
 # Git 分支切换（模糊查找）
-gco-fzf() {
-    if command -v fzf &> /dev/null; then
-        git branch | grep -v "^\*" | fzf | xargs git checkout
-    else
-        echo "fzf 未安装"
-    fi
-}
 
 # Git 批量拉取
 git-pull-all() {
