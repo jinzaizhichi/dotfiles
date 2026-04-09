@@ -2,6 +2,7 @@
     email = "jinzaizhichi9888@gmail.com"
     name = "jinzaizhichi"
     gpgKey = "jinzaizhichi9888@gmail.com"
+    isLinux = {{ eq .chezmoi.os "linux" }}
     isWSL = {{ ne (lookPath "wsl.exe") "" }}
     isArch = {{ eq .chezmoi.osRelease.id "arch" }}
     isUbuntu = {{ eq .chezmoi.osRelease.id "ubuntu" }}
