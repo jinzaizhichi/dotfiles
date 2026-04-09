@@ -1,0 +1,283 @@
+# ============================================
+# 别名配置（跨平台）
+# 自动生成 - 请勿直接编辑此文件
+# ============================================
+
+# ============================================
+# 基础别名
+# ============================================
+
+alias ls='ls --color=auto'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# 目录跳转
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+
+# 安全别名
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias mkdir='mkdir -p'
+
+# ============================================
+# 编辑器别名
+# ============================================
+
+alias vim='nvim'
+alias vi='nvim'
+alias v='nvim'
+alias vimdiff='nvim -d'
+
+# 快速编辑配置
+alias zshrc='chezmoi edit ~/.zshrc'
+alias zshenv='chezmoi edit ~/.config/zsh/00-env.zsh'
+alias zshalias='chezmoi edit ~/.config/zsh/20-aliases.zsh'
+alias vimrc='nvim ~/.config/nvim/init.lua'
+
+# ============================================
+# Git 别名
+# ============================================
+
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gl='git log --oneline --graph --decorate'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gco='git checkout'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gf='git fetch'
+alias gr='git remote -v'
+alias gst='git stash'
+alias gsta='git stash apply'
+alias gstp='git stash pop'
+
+# Git 高级别名
+alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
+alias gundo='git reset --soft HEAD^'
+alias gclean='git clean -fd'
+
+# ============================================
+# 系统管理别名
+# ============================================
+
+{{- if .isArch }}
+# Arch Linux 包管理
+alias update='sudo pacman -Syu'
+alias install='sudo pacman -S'
+alias remove='sudo pacman -Rns'
+alias search='pacman -Ss'
+alias yayup='yay -Syu'
+alias paclean='sudo pacman -Sc'
+{{- end }}
+
+{{- if .isUbuntu }}
+# Ubuntu/Debian 包管理
+alias update='sudo apt update && sudo apt upgrade'
+alias install='sudo apt install'
+alias remove='sudo apt remove'
+alias search='apt search'
+alias autoremove='sudo apt autoremove'
+{{- end }}
+
+{{- if .isMac }}
+# macOS Homebrew
+alias update='brew update && brew upgrade'
+alias install='brew install'
+alias remove='brew uninstall'
+alias search='brew search'
+alias brewclean='brew cleanup'
+{{- end }}
+
+# ============================================
+# Docker 别名
+# ============================================
+
+alias d='docker'
+alias dc='docker-compose'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias dimg='docker images'
+alias dlog='docker logs -f'
+alias dexec='docker exec -it'
+alias dstop='docker stop $(docker ps -q)'
+alias drm='docker rm $(docker ps -aq)'
+alias drmi='docker rmi $(docker images -q)'
+alias dclean='docker system prune -af --volumes'
+alias dcu='docker-compose up -d'
+alias dcd='docker-compose down'
+alias dcl='docker-compose logs -f'
+alias dcr='docker-compose restart'
+
+# ============================================
+# Python 别名
+# ============================================
+
+alias py='python3'
+alias python='python3'
+alias pip='pip3'
+alias ipy='ipython'
+alias jl='jupyter lab'
+alias jn='jupyter notebook'
+
+# Python 虚拟环境
+alias venv='python3 -m venv .venv'
+alias activate='source .venv/bin/activate'
+alias deactivate='deactivate'
+
+# pip 安全安装（Arch 需要 --break-system-packages）
+{{- if .isArch }}
+alias pipi='pip install --break-system-packages'
+alias pipu='pip install --upgrade --break-system-packages'
+{{- else }}
+alias pipi='pip install'
+alias pipu='pip install --upgrade'
+{{- end }}
+
+# ============================================
+# Node.js 别名
+# ============================================
+
+alias n='npm'
+alias ni='npm install'
+alias nid='npm install --save-dev'
+alias nig='npm install -g --prefix ~/.npm-global'
+alias nr='npm run'
+alias ns='npm start'
+alias nt='npm test'
+alias nb='npm run build'
+alias nw='npm run watch'
+alias nci='rm -rf node_modules package-lock.json && npm install'
+
+# Yarn
+alias y='yarn'
+alias ya='yarn add'
+alias yad='yarn add --dev'
+alias yr='yarn run'
+alias ys='yarn start'
+
+# pnpm
+alias pn='pnpm'
+alias pni='pnpm install'
+alias pna='pnpm add'
+alias pnr='pnpm run'
+
+# ============================================
+# 系统监控别名
+# ============================================
+
+alias top='htop'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+alias ps='ps aux'
+alias ports='netstat -tulanp'
+alias listening='lsof -i -P | grep LISTEN'
+
+# ============================================
+# 网络工具
+# ============================================
+
+alias myip='curl ifconfig.me'
+alias myipv4='curl -4 ifconfig.me'
+alias myipv6='curl -6 ifconfig.me'
+alias ping='ping -c 5'
+alias speedtest='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 -'
+
+# 代理测试
+alias testproxy='curl -I https://www.google.com'
+alias proxyoff='unset http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY'
+
+# ============================================
+# WSL 特定别名
+# ============================================
+
+{{- if .isWSL }}
+# Windows 互操作
+alias open='explorer.exe'
+alias clip='clip.exe'
+alias wopen='explorer.exe .'
+alias pwdcopy='pwd | clip.exe'
+alias wsl-restart='wsl.exe --shutdown'
+
+# Windows 工具
+alias code='code.exe'
+alias notepad='notepad.exe'
+{{- end }}
+
+# ============================================
+# macOS 特定别名
+# ============================================
+
+{{- if .isMac }}
+# macOS 工具
+alias flush='dscacheutil -flushcache && killall -HUP mDNSResponder'
+alias show='defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder'
+alias hide='defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder'
+alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
+{{- end }}
+
+# ============================================
+# 项目快捷跳转
+# ============================================
+
+alias cdtv='cd ~/projects/tv-chart'
+alias cdopt='cd ~/projects/options-tracker'
+alias cdbot='cd ~/projects/tg-bot'
+alias cdwx='cd ~/projects/wechat-account'
+alias cdsite='cd ~/projects/jinzaizhichi.cn'
+alias cdproj='cd ~/projects'
+
+# ============================================
+# Chezmoi 别名
+# ============================================
+
+alias cm='chezmoi'
+alias cma='chezmoi apply'
+alias cme='chezmoi edit'
+alias cmcd='chezmoi cd'
+alias cmu='chezmoi update'
+alias cmd='chezmoi diff'
+alias cms='chezmoi status'
+alias cmr='chezmoi re-add'
+
+# ============================================
+# 其他实用别名
+# ============================================
+
+# 快速服务器
+alias serve='python3 -m http.server'
+alias serve8080='python3 -m http.server 8080'
+
+# JSON 格式化
+alias json='python3 -m json.tool'
+
+# 查看天气
+alias weather='curl wttr.in'
+alias weather-cn='curl wttr.in/Beijing'
+
+# 生成密码
+alias genpass='openssl rand -base64 32'
+
+# 颜色测试
+alias colors='for i in {0..255}; do echo -e "\e[38;5;${i}m${i}"; done | column -c 80 -s " "; echo -e "\e[m"'
+
+# 清理下载目录
+alias cleandl='find ~/Downloads -type f -atime +30 -delete'
+
+# 安全删除
+alias shred='shred -vfz -n 10'
+
+# 快速备份
+alias backup='rsync -avh --progress'

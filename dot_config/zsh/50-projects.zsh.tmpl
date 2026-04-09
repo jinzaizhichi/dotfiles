@@ -1,0 +1,291 @@
+# ============================================
+# 项目特定配置
+# 你的交易和开发项目配置
+# ============================================
+
+# ============================================
+# 项目路径
+# ============================================
+
+export PROJECTS_DIR="$HOME/projects"
+
+# ============================================
+# 项目启动函数
+# ============================================
+
+# tv-chart - TradingView 图表项目
+start-tv-chart() {
+    cd ~/projects/tv-chart
+    echo "🚀 Starting tv-chart development server..."
+    npm run dev
+}
+
+# options-tracker - 期权追踪器
+start-options-tracker() {
+    cd ~/projects/options-tracker
+    echo "🚀 Starting options tracker..."
+    
+    # 激活虚拟环境（如果存在）
+    if [ -f .venv/bin/activate ]; then
+        source .venv/bin/activate
+    fi
+    
+    # 启动服务
+    if [ -f app.py ]; then
+        python app.py
+    elif [ -f main.py ]; then
+        python main.py
+    else
+        echo "未找到启动文件"
+    fi
+}
+
+# telegram-bot - Telegram 机器人
+start-tg-bot() {
+    cd ~/projects/tg-bot
+    echo "🚀 Starting Telegram bot..."
+    
+    if [ -f .venv/bin/activate ]; then
+        source .venv/bin/activate
+    fi
+    
+    python bot.py
+}
+
+# wechat-account - 微信公众号
+start-wx-account() {
+    cd ~/projects/wechat-account
+    echo "🚀 Starting WeChat account service..."
+    
+    if [ -f .venv/bin/activate ]; then
+        source .venv/bin/activate
+    fi
+    
+    flask run --host=0.0.0.0 --port=5000
+}
+
+# jinzaizhichi.cn - 淘宝联盟网站
+start-taobao-site() {
+    cd ~/projects/jinzaizhichi.cn
+    echo "🚀 Starting Taobao affiliate site..."
+    
+    # 根据项目类型启动
+    if [ -f package.json ]; then
+        npm run dev
+    elif [ -f app.py ]; then
+        if [ -f .venv/bin/activate ]; then
+            source .venv/bin/activate
+        fi
+        python app.py
+    fi
+}
+
+# ============================================
+# 项目状态检查
+# ============================================
+
+# 检查所有项目的 Git 状态
+check-all-projects() {
+    echo "📊 检查所有项目状态...\n"
+    
+    local projects=(
+        "tv-chart"
+        "options-tracker"
+        "tg-bot"
+        "wechat-account"
+        "jinzaizhichi.cn"
+    )
+    
+    for project in "${projects[@]}"; do
+        local dir="$PROJECTS_DIR/$project"
+        if [ -d "$dir" ]; then
+            echo "📁 $project:"
+            cd "$dir"
+            
+            if [ -d .git ]; then
+                git status --short
+                echo ""
+            else
+                echo "  ⚠️  不是 Git 仓库\n"
+            fi
+        else
+            echo "📁 $project: ❌ 目录不存在\n"
+        fi
+    done
+    
+    cd - > /dev/null
+}
+
+# 拉取所有项目
+pull-all-projects() {
+    echo "📥 拉取所有项目...\n"
+    
+    for dir in $PROJECTS_DIR/*/; do
+        if [ -d "$dir/.git" ]; then
+            echo "📥 $(basename $dir):"
+            (cd "$dir" && git pull)
+            echo ""
+        fi
+    done
+}
+
+# ============================================
+# 开发环境切换
+# ============================================
+
+# 期权交易开发环境
+dev-options() {
+    echo "📊 期权交易开发环境"
+    
+    # 进入项目目录
+    cdopt
+    
+    # 激活 Python 环境
+    if [ -f .venv/bin/activate ]; then
+        source .venv/bin/activate
+        echo "✅ Python 虚拟环境已激活"
+    fi
+    
+    # 设置环境变量（如果有 .env 文件）
+    if [ -f .env ]; then
+        export $(cat .env | grep -v '^#' | xargs)
+        echo "✅ 环境变量已加载"
+    fi
+    
+    echo "💡 使用 start-options-tracker 启动服务"
+}
+
+# 前端开发环境
+dev-frontend() {
+    echo "🎨 前端开发环境"
+    
+    # 进入 tv-chart 项目
+    cdtv
+    
+    echo "💡 使用 npm run dev 启动开发服务器"
+}
+
+# ============================================
+# 数据库快捷操作
+# ============================================
+
+# SQLite 数据库查看
+view-db() {
+    if [ -z "$1" ]; then
+        echo "Usage: view-db <database.db>"
+        return 1
+    fi
+    
+    if [ -f "$1" ]; then
+        sqlite3 "$1"
+    else
+        echo "数据库文件不存在: $1"
+    fi
+}
+
+# ============================================
+# 交易相关函数
+# ============================================
+
+# 查看期权持仓（如果有 CLI 工具）
+check-positions() {
+    if [ -f ~/projects/options-tracker/.venv/bin/activate ]; then
+        source ~/projects/options-tracker/.venv/bin/activate
+        python -c "from app import get_positions; print(get_positions())"
+    else
+        echo "options-tracker 环境未配置"
+    fi
+}
+
+# ============================================
+# VPS 相关函数
+# ============================================
+
+# SSH 到 VPS
+ssh-vps() {
+    ssh root@91.230.73.42
+}
+
+# 同步项目到 VPS
+sync-to-vps() {
+    if [ -z "$1" ]; then
+        echo "Usage: sync-to-vps <project-name>"
+        echo "Available: tv-chart, options-tracker, tg-bot, wechat-account"
+        return 1
+    fi
+    
+    local project="$1"
+    local local_path="$PROJECTS_DIR/$project"
+    local remote_path="/opt/$project"
+    
+    if [ ! -d "$local_path" ]; then
+        echo "项目不存在: $project"
+        return 1
+    fi
+    
+    echo "📤 同步 $project 到 VPS..."
+    rsync -avz --progress \
+        --exclude 'node_modules' \
+        --exclude '.venv' \
+        --exclude '__pycache__' \
+        --exclude '.git' \
+        "$local_path/" \
+        "root@91.230.73.42:$remote_path/"
+    
+    echo "✅ 同步完成"
+}
+
+# ============================================
+# Coolify 部署
+# ============================================
+
+# 触发 Coolify 重新部署
+coolify-deploy() {
+    if [ -z "$1" ]; then
+        echo "Usage: coolify-deploy <service-name>"
+        return 1
+    fi
+    
+    echo "🚀 触发 Coolify 部署: $1"
+    # 这里添加你的 Coolify webhook 或 CLI 命令
+}
+
+# ============================================
+# Nginx 日志查看
+# ============================================
+
+# 查看 Nginx 访问日志
+nginx-access() {
+    ssh root@91.230.73.42 "tail -f /var/log/nginx/access.log"
+}
+
+# 查看 Nginx 错误日志
+nginx-error() {
+    ssh root@91.230.73.42 "tail -f /var/log/nginx/error.log"
+}
+
+# ============================================
+# 快速备份
+# ============================================
+
+# 备份所有项目代码
+backup-projects() {
+    local backup_dir="$HOME/backups/projects-$(date +%Y%m%d)"
+    mkdir -p "$backup_dir"
+    
+    echo "📦 备份所有项目到: $backup_dir"
+    
+    for dir in $PROJECTS_DIR/*/; do
+        local project_name=$(basename "$dir")
+        echo "备份: $project_name"
+        
+        tar -czf "$backup_dir/$project_name.tar.gz" \
+            -C "$PROJECTS_DIR" \
+            --exclude 'node_modules' \
+            --exclude '.venv' \
+            --exclude '__pycache__' \
+            "$project_name"
+    done
+    
+    echo "✅ 备份完成: $backup_dir"
+}

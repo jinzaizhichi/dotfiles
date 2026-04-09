@@ -1,0 +1,126 @@
+# ============================================
+# 环境变量配置
+# 自动生成 - 请勿直接编辑此文件
+# 使用: chezmoi edit ~/.config/zsh/00-env.zsh
+# ============================================
+
+# 语言设置
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# 编辑器（统一使用 nvim）
+export EDITOR=nvim
+export VISUAL=nvim
+
+# XDG Base Directory
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+# Zsh 配置目录
+export ZDOTDIR="$HOME"
+
+# ============================================
+# 系统特定环境变量
+# ============================================
+
+{{- if .isWSL }}
+# WSL 特定配置
+export WINDOWS_HOST=$(cat /etc/resolv.conf 2>/dev/null | grep nameserver | awk '{print $2}')
+
+# WSL 代理设置（根据需要取消注释）
+# export http_proxy="http://${WINDOWS_HOST}:7890"
+# export https_proxy="http://${WINDOWS_HOST}:7890"
+# export all_proxy="socks5://${WINDOWS_HOST}:7891"
+
+# WSL 特定工具
+export BROWSER="wslview"
+{{- end }}
+
+{{- if .isMac }}
+# macOS 特定配置
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_NO_AUTO_UPDATE=1
+{{- end }}
+
+# ============================================
+# 安全：API Keys 使用 pass 管理
+# ============================================
+
+{{- if lookPath "pass" }}
+# OpenAI API Key（从 pass 读取）
+export OPENAI_API_KEY="$(pass show openai/api 2>/dev/null || echo '')"
+
+# Gemini API Key（从 pass 读取）
+export GEMINI_API_KEY="$(pass show google/gemini/api 2>/dev/null || echo '')"
+
+# IPInfo API Key（从 pass 读取）
+export IPINFO_API_KEY="$(pass show IPinfo/apikey 2>/dev/null || echo '')"
+
+# AWS Credentials（通过 pass 读取）
+export AWS_ACCESS_KEY_ID="$(pass show aws/jinzaizhichi/aws_access_key_id 2>/dev/null || echo '')"
+export AWS_SECRET_ACCESS_KEY="$(pass show aws/jinzaizhichi/aws_secret_access_key 2>/dev/null || echo '')"
+{{- else }}
+# pass 未安装，使用环境变量
+# 警告：不要在此文件中硬编码 API Keys
+# 请安装 pass: https://www.passwordstore.org/
+{{- end }}
+
+# ============================================
+# 其他环境变量
+# ============================================
+
+# Python
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONUNBUFFERED=1
+
+# Node.js
+export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+export NODE_REPL_HISTORY="$XDG_DATA_HOME/node_repl_history"
+
+# Rust
+export CARGO_HOME="$HOME/.cargo"
+export RUSTUP_HOME="$HOME/.rustup"
+
+# Go
+export GOPATH="$HOME/go"
+export GOBIN="$GOPATH/bin"
+
+# Bun
+export BUN_INSTALL="$HOME/.bun"
+
+# Docker
+export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+
+# 加密相关
+export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
+
+# 历史记录设置
+export HISTSIZE=50000
+export SAVEHIST=50000
+export HISTFILE="$HOME/.zsh_history"
+
+# 禁用 less 的历史文件
+export LESSHISTFILE=-
+
+# ============================================
+# 系统检测标志
+# ============================================
+
+{{- if .isWSL }}
+export IS_WSL=1
+{{- end }}
+
+{{- if .isArch }}
+export IS_ARCH=1
+{{- end }}
+
+{{- if .isUbuntu }}
+export IS_UBUNTU=1
+{{- end }}
+
+{{- if .isMac }}
+export IS_MAC=1
+{{- end }}

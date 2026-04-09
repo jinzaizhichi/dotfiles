@@ -1,0 +1,379 @@
+# ============================================
+# 自定义函数
+# 自动生成 - 请勿直接编辑此文件
+# ============================================
+
+# ============================================
+# 目录和文件操作
+# ============================================
+
+# 创建目录并进入
+mkcd() {
+    if [ -z "$1" ]; then
+        echo "Usage: mkcd <directory>"
+        return 1
+    fi
+    mkdir -p "$1" && cd "$1"
+}
+
+# 快速查找文件
+ff() {
+    find . -name "*$1*" 2>/dev/null
+}
+
+# 快速查找内容
+ftext() {
+    if [ -z "$1" ]; then
+        echo "Usage: ftext <search-term> [path]"
+        return 1
+    fi
+    grep -r "$1" "${2:-.}" 2>/dev/null
+}
+
+# 备份文件
+backup() {
+    if [ -z "$1" ]; then
+        echo "Usage: backup <file>"
+        return 1
+    fi
+    cp "$1" "$1.backup.$(date +%Y%m%d_%H%M%S)"
+    echo "✅ 已备份: $1"
+}
+
+# 解压任意格式
+extract() {
+    if [ -z "$1" ]; then
+        echo "Usage: extract <file>"
+        return 1
+    fi
+    
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"    ;;
+            *.tar.gz)    tar xzf "$1"    ;;
+            *.tar.xz)    tar xJf "$1"    ;;
+            *.bz2)       bunzip2 "$1"    ;;
+            *.rar)       unrar x "$1"    ;;
+            *.gz)        gunzip "$1"     ;;
+            *.tar)       tar xf "$1"     ;;
+            *.tbz2)      tar xjf "$1"    ;;
+            *.tgz)       tar xzf "$1"    ;;
+            *.zip)       unzip "$1"      ;;
+            *.Z)         uncompress "$1" ;;
+            *.7z)        7z x "$1"       ;;
+            *)           echo "不支持的格式: $1" ;;
+        esac
+    else
+        echo "文件不存在: $1"
+    fi
+}
+
+# ============================================
+# Git 增强函数
+# ============================================
+
+# Git 快速提交
+gcam() {
+    if [ -z "$1" ]; then
+        echo "Usage: gcam <commit-message>"
+        return 1
+    fi
+    git add -A && git commit -m "$1"
+}
+
+# Git 快速提交并推送
+gcap() {
+    if [ -z "$1" ]; then
+        echo "Usage: gcap <commit-message>"
+        return 1
+    fi
+    git add -A && git commit -m "$1" && git push
+}
+
+# Git 分支切换（模糊查找）
+gco-fzf() {
+    if command -v fzf &> /dev/null; then
+        git branch | grep -v "^\*" | fzf | xargs git checkout
+    else
+        echo "fzf 未安装"
+    fi
+}
+
+# Git 批量拉取
+git-pull-all() {
+    for dir in */; do
+        if [ -d "$dir/.git" ]; then
+            echo "📥 Pulling $dir..."
+            (cd "$dir" && git pull)
+        fi
+    done
+}
+
+# Git 清理已合并的分支
+git-clean-merged() {
+    git branch --merged | grep -v "\*\|main\|master\|develop" | xargs -n 1 git branch -d
+}
+
+# ============================================
+# Python 开发函数
+# ============================================
+
+# 创建 Python 项目
+pyproject() {
+    if [ -z "$1" ]; then
+        echo "Usage: pyproject <project-name>"
+        return 1
+    fi
+    
+    mkdir -p "$1"/{src,tests,docs}
+    cd "$1"
+    
+    # 创建虚拟环境
+    python3 -m venv .venv
+    
+    # 创建 requirements.txt
+    cat > requirements.txt << 'EOF'
+# Production dependencies
+flask
+requests
+
+# Development dependencies
+pytest
+black
+flake8
+mypy
+EOF
+    
+    # 创建 .gitignore
+    cat > .gitignore << 'EOF'
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
+*.db
+*.sqlite
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+EOF
+    
+    # 创建 README
+    cat > README.md << EOF
+# $1
+
+## Setup
+
+\`\`\`bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+\`\`\`
+EOF
+    
+    echo "✅ Python 项目 $1 创建完成"
+    echo "📦 激活虚拟环境: source .venv/bin/activate"
+}
+
+# Flask 开发服务器
+flask-dev() {
+    export FLASK_APP=app.py
+    export FLASK_ENV=development
+    flask run --host=0.0.0.0 --port="${1:-5000}"
+}
+
+# ============================================
+# Node.js 开发函数
+# ============================================
+
+# 创建 Node.js 项目
+nodeproject() {
+    if [ -z "$1" ]; then
+        echo "Usage: nodeproject <project-name>"
+        return 1
+    fi
+    
+    mkdir -p "$1"
+    cd "$1"
+    
+    npm init -y
+    
+    # 创建 .gitignore
+    cat > .gitignore << 'EOF'
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.log
+.DS_Store
+EOF
+    
+    echo "✅ Node.js 项目 $1 创建完成"
+}
+
+# 清理 node_modules
+clean-node() {
+    find . -name "node_modules" -type d -prune -exec rm -rf {} +
+    echo "✅ 已清理所有 node_modules"
+}
+
+# ============================================
+# Docker 函数
+# ============================================
+
+# Docker 进入容器
+denter() {
+    if [ -z "$1" ]; then
+        echo "Usage: denter <container-name-or-id>"
+        return 1
+    fi
+    docker exec -it "$1" /bin/bash || docker exec -it "$1" /bin/sh
+}
+
+# Docker 清理
+docker-cleanup-full() {
+    echo "🧹 清理所有 Docker 资源..."
+    docker stop $(docker ps -aq) 2>/dev/null
+    docker rm $(docker ps -aq) 2>/dev/null
+    docker rmi $(docker images -q) 2>/dev/null
+    docker volume prune -f
+    docker network prune -f
+    docker system prune -af --volumes
+    echo "✅ 清理完成"
+}
+
+# ============================================
+# 网络和端口函数
+# ============================================
+
+# 查看端口占用
+port() {
+    if [ -z "$1" ]; then
+        echo "Usage: port <port-number>"
+        return 1
+    fi
+    
+{{- if .isMac }}
+    lsof -i ":$1"
+{{- else }}
+    lsof -i ":$1" 2>/dev/null || ss -tulpn | grep ":$1"
+{{- end }}
+}
+
+# 杀死占用端口的进程
+killport() {
+    if [ -z "$1" ]; then
+        echo "Usage: killport <port-number>"
+        return 1
+    fi
+    
+{{- if .isMac }}
+    lsof -ti:$1 | xargs kill -9
+{{- else }}
+    fuser -k $1/tcp
+{{- end }}
+}
+
+# ============================================
+# 系统工具函数
+# ============================================
+
+# 查看目录大小（排序）
+ducks() {
+    du -h --max-depth=1 "${1:-.}" 2>/dev/null | sort -hr | head -20
+}
+
+# 查找大文件
+bigfiles() {
+    find "${1:-.}" -type f -exec du -h {} + 2>/dev/null | sort -rh | head -20
+}
+
+# 系统信息
+sysinfo() {
+    echo "=== System Information ==="
+    echo "OS: $(uname -s)"
+    echo "Kernel: $(uname -r)"
+{{- if .isLinux }}
+    echo "Distro: $(cat /etc/os-release | grep '^PRETTY_NAME' | cut -d= -f2 | tr -d '"')"
+{{- end }}
+{{- if .isMac }}
+    echo "macOS: $(sw_vers -productVersion)"
+{{- end }}
+    echo "Hostname: $(hostname)"
+    echo "User: $(whoami)"
+    echo "Shell: $SHELL"
+    echo "CPU: $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null) cores"
+    echo "Memory: $(free -h 2>/dev/null | grep Mem | awk '{print $2}' || echo 'N/A')"
+}
+
+# ============================================
+# 开发工具函数
+# ============================================
+
+# 快速启动 HTTP 服务器（支持端口选择）
+serve() {
+    local port="${1:-8000}"
+    echo "🌐 Starting HTTP server on port $port..."
+    echo "📍 http://localhost:$port"
+    python3 -m http.server "$port"
+}
+
+# 代码统计
+codecount() {
+    find "${1:-.}" -type f \( -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" -o -name "*.go" -o -name "*.rs" \) -exec wc -l {} + | sort -n | tail -20
+}
+
+# Git 仓库统计
+gitstat() {
+    echo "=== Git Repository Statistics ==="
+    echo "Total commits: $(git rev-list --all --count)"
+    echo "Total branches: $(git branch -a | wc -l)"
+    echo "Contributors: $(git shortlog -sn | wc -l)"
+    echo ""
+    echo "Top contributors:"
+    git shortlog -sn | head -10
+}
+
+# ============================================
+# 性能测试
+# ============================================
+
+# 测试命令执行时间
+benchmark() {
+    if [ -z "$1" ]; then
+        echo "Usage: benchmark <command>"
+        return 1
+    fi
+    time ( for i in {1..10}; do eval "$@" >/dev/null 2>&1; done )
+}
+
+# ============================================
+# AI/LLM 相关函数
+# ============================================
+
+# 快速调用 OpenAI API
+ask-gpt() {
+    if [ -z "$1" ]; then
+        echo "Usage: ask-gpt <question>"
+        return 1
+    fi
+    
+    if [ -z "$OPENAI_API_KEY" ]; then
+        echo "OPENAI_API_KEY 未设置"
+        return 1
+    fi
+    
+    curl https://api.openai.com/v1/chat/completions \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $OPENAI_API_KEY" \
+        -d "{
+            \"model\": \"gpt-3.5-turbo\",
+            \"messages\": [{\"role\": \"user\", \"content\": \"$*\"}]
+        }" | jq -r '.choices[0].message.content'
+}

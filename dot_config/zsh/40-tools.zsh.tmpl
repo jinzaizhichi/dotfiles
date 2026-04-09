@@ -1,0 +1,284 @@
+# ============================================
+# 工具集成
+# 保留你现有的所有工具配置
+# ============================================
+
+# ============================================
+# Oh My Zsh 插件配置
+# ============================================
+
+# 插件列表
+plugins=(
+    git
+    zsh-autosuggestions
+{{- if .isArch }}
+    fasd
+{{- end }}
+{{- if .isMac }}
+    brew
+    macos
+{{- end }}
+{{- if .isWSL }}
+    # WSL 特定插件
+{{- end }}
+)
+
+# zsh-autosuggestions 设置
+bindkey '^j' autosuggest-accept      # Ctrl+J 接受建议
+bindkey '^k' autosuggest-execute     # Ctrl+K 执行建议
+bindkey -s '\e\e' '\C-asudo \C-e'    # ESC ESC 添加 sudo
+bindkey '^x' kill-line               # Ctrl+X 删除到行尾
+
+# ============================================
+# Powerlevel10k Instant Prompt
+# ============================================
+
+# 启用 Powerlevel10k instant prompt
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# ============================================
+# fasd - 快速跳转
+# ============================================
+
+{{- if lookPath "fasd" }}
+# 初始化 fasd
+eval "$(fasd --init auto)"
+
+# fasd 别名
+alias v='f -e nvim'      # 用 nvim 快速打开文件
+alias j='fasd_cd -d'     # 快速跳转目录
+alias jj='fasd_cd -d -i' # 交互式跳转
+{{- end }}
+
+# ============================================
+# atuin - 历史记录搜索
+# ============================================
+
+{{- if lookPath "atuin" }}
+# 初始化 atuin
+eval "$(atuin init zsh)"
+
+# atuin 配置
+export ATUIN_NOBIND="true"
+bindkey '^r' _atuin_search_widget  # Ctrl+R 搜索历史
+{{- end }}
+
+# ============================================
+# broot - 目录导航
+# ============================================
+
+{{- if lookPath "br" }}
+# broot 启动器
+[ -f "$HOME/.config/broot/launcher/bash/br" ] && \
+    source "$HOME/.config/broot/launcher/bash/br"
+{{- end }}
+
+# ============================================
+# fzf - 模糊查找
+# ============================================
+
+{{- if lookPath "fzf" }}
+# fzf 配置
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
+
+# fzf 自动补全和快捷键
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# fzf + git
+{{- if lookPath "git" }}
+alias gco-fzf='git branch | fzf | xargs git checkout'
+alias gshow-fzf='git log --oneline | fzf | cut -d" " -f1 | xargs git show'
+{{- end }}
+{{- end }}
+
+# ============================================
+# direnv - 自动加载环境变量
+# ============================================
+
+{{- if lookPath "direnv" }}
+eval "$(direnv hook zsh)"
+{{- end }}
+
+# ============================================
+# zoxide - 智能 cd
+# ============================================
+
+{{- if lookPath "zoxide" }}
+eval "$(zoxide init zsh)"
+alias cd='z'  # 替换 cd
+{{- end }}
+
+# ============================================
+# starship - 现代化提示符（可选替代 p10k）
+# ============================================
+
+# {{- if lookPath "starship" }}
+# eval "$(starship init zsh)"
+# {{- end }}
+
+# ============================================
+# Bun - JavaScript 运行时
+# ============================================
+
+{{- if lookPath "bun" }}
+# bun 补全
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+{{- end }}
+
+# ============================================
+# OpenClaw - 你的自定义工具
+# ============================================
+
+{{- if fileExists (joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh") }}
+source "$HOME/.openclaw/completions/openclaw.zsh"
+{{- end }}
+
+# ============================================
+# nvm - Node Version Manager
+# ============================================
+
+{{- if fileExists (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+{{- end }}
+
+# ============================================
+# pyenv - Python Version Manager
+# ============================================
+
+{{- if lookPath "pyenv" }}
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+{{- end }}
+
+# ============================================
+# rbenv - Ruby Version Manager
+# ============================================
+
+{{- if lookPath "rbenv" }}
+eval "$(rbenv init - zsh)"
+{{- end }}
+
+# ============================================
+# Docker Compose v2
+# ============================================
+
+{{- if lookPath "docker" }}
+# Docker Compose v2 别名
+alias docker-compose='docker compose'
+{{- end }}
+
+# ============================================
+# kubectl - Kubernetes
+# ============================================
+
+{{- if lookPath "kubectl" }}
+# kubectl 补全
+source <(kubectl completion zsh)
+alias k='kubectl'
+complete -F __start_kubectl k
+{{- end }}
+
+# ============================================
+# Terraform
+# ============================================
+
+{{- if lookPath "terraform" }}
+# Terraform 补全
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /usr/bin/terraform terraform
+{{- end }}
+
+# ============================================
+# AWS CLI
+# ============================================
+
+{{- if lookPath "aws" }}
+# AWS CLI 补全
+{{- if .isMac }}
+complete -C '/usr/local/bin/aws_completer' aws
+{{- else }}
+complete -C aws_completer aws
+{{- end }}
+
+# AWS 安全别名（使用 pass）
+{{- if lookPath "pass" }}
+alias aws-login='export AWS_ACCESS_KEY_ID=$(pass show aws/jinzaizhichi/aws_access_key_id) AWS_SECRET_ACCESS_KEY=$(pass show aws/jinzaizhichi/aws_secret_access_key)'
+{{- end }}
+{{- end }}
+
+# ============================================
+# GitHub CLI
+# ============================================
+
+{{- if lookPath "gh" }}
+# GitHub CLI 补全
+eval "$(gh completion -s zsh)"
+{{- end }}
+
+# ============================================
+# Rust
+# ============================================
+
+{{- if fileExists (joinPath .chezmoi.homeDir ".cargo/env") }}
+source "$HOME/.cargo/env"
+{{- end }}
+
+# ============================================
+# macOS 特定工具
+# ============================================
+
+{{- if .isMac }}
+# Homebrew
+{{- if lookPath "brew" }}
+# Homebrew 补全
+FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+{{- end }}
+
+# iTerm2 Shell Integration
+[ -f "$HOME/.iterm2_shell_integration.zsh" ] && \
+    source "$HOME/.iterm2_shell_integration.zsh"
+{{- end }}
+
+# ============================================
+# Powerlevel10k 主题加载
+# ============================================
+
+{{- if .isArch }}
+# Arch Linux - 从系统包加载
+if [ -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ]; then
+    source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+fi
+{{- else if .isMac }}
+# macOS - 从 Homebrew 加载
+if [ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]; then
+    source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+fi
+{{- else }}
+# 其他系统 - 从 Oh My Zsh custom 加载
+if [ -f ~/.oh-my-zsh/custom/themes/powerlevel10k/powerlevel10k.zsh-theme ]; then
+    source ~/.oh-my-zsh/custom/themes/powerlevel10k/powerlevel10k.zsh-theme
+fi
+{{- end }}
+
+# 加载 p10k 配置
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Powerlevel10k Instant Prompt 设置
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+# ============================================
+# 历史记录设置
+# ============================================
+
+setopt HIST_IGNORE_SPACE        # 忽略以空格开头的命令
+setopt HIST_IGNORE_DUPS         # 忽略重复命令
+setopt HIST_EXPIRE_DUPS_FIRST   # 清理时优先删除重复
+setopt HIST_FIND_NO_DUPS        # 搜索时忽略重复
+setopt SHARE_HISTORY            # 共享历史记录
+setopt APPEND_HISTORY           # 追加而不是覆盖
+setopt INC_APPEND_HISTORY       # 立即写入历史
