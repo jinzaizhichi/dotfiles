@@ -131,7 +131,7 @@ alias cd='z'  # 替换 cd
 # OpenClaw - 你的自定义工具
 # ============================================
 
-{{- if fileExists (joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh") }}
+{{- if stat (joinPath .chezmoi.homeDir ".openclaw/completions/openclaw.zsh") }}
 source "$HOME/.openclaw/completions/openclaw.zsh"
 {{- end }}
 
@@ -139,7 +139,7 @@ source "$HOME/.openclaw/completions/openclaw.zsh"
 # nvm - Node Version Manager
 # ============================================
 
-{{- if fileExists (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
+{{- if stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
@@ -224,7 +224,7 @@ eval "$(gh completion -s zsh)"
 # Rust
 # ============================================
 
-{{- if fileExists (joinPath .chezmoi.homeDir ".cargo/env") }}
+{{- if stat (joinPath .chezmoi.homeDir ".cargo/env") }}
 source "$HOME/.cargo/env"
 {{- end }}
 
