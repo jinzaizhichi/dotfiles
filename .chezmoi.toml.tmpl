@@ -1,31 +1,22 @@
-{{- $email := "jinzaizhichi9888@gmail.com" -}}
-{{- $name := "jinzaizhichi" -}}
-{{- $gpgKey := "jinzaizhichi9888@gmail.com" -}}
-
-{{- $isWSL := and (eq .chezmoi.os "linux") (lookPath "wsl.exe") -}}
-{{- $isArch := eq .chezmoi.osRelease.id "arch" -}}
-{{- $isUbuntu := eq .chezmoi.osRelease.id "ubuntu" -}}
-{{- $isMac := eq .chezmoi.os "darwin" -}}
+{{- $isWSL := false -}}
+{{- $isLinux := eq .chezmoi.os "linux" -}}
+{{- if $isLinux -}}
+{{-   $isWSL = lookPath "wsl.exe" -}}
+{{- end -}}
 
 [data]
-    email = {{ $email | quote }}
-    name = {{ $name | quote }}
-    gpgKey = {{ $gpgKey | quote }}
-    
-    # 系统检测
+    email = "jinzaizhichi9888@gmail.com"
+    name = "jinzaizhichi"
+    gpgKey = "jinzaizhichi9888@gmail.com"
     isWSL = {{ $isWSL }}
-    isArch = {{ $isArch }}
-    isUbuntu = {{ $isUbuntu }}
-    isMac = {{ $isMac }}
-    
-    # 用户名（跨平台）
-    username = {{ .chezmoi.username | quote }}
-    
-    # 家目录
-    homeDir = {{ .chezmoi.homeDir | quote }}
+    isArch = {{ eq .chezmoi.osRelease.id "arch" }}
+    isUbuntu = {{ eq .chezmoi.osRelease.id "ubuntu" }}
+    isMac = {{ eq .chezmoi.os "darwin" }}
+    username = "{{ .chezmoi.username }}"
+    homeDir = "{{ .chezmoi.homeDir }}"
 
 [gpg]
-    recipient = {{ $gpgKey | quote }}
+    recipient = "jinzaizhichi9888@gmail.com"
 
 [git]
     autoCommit = true
