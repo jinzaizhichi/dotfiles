@@ -1,7 +1,7 @@
 #!/bin/bash
 # 系统包安装脚本
 # 为什么用 run_once_：包管理器安装只需做一次，后续用 update 命令维护
-set -e
+set -euo pipefail
 
 echo "==> [10-packages] 安装系统包..."
 
@@ -37,6 +37,7 @@ brew install \
 if ! command -v yay &>/dev/null; then
     echo "安装 yay..."
     sudo pacman -S --noconfirm --needed git base-devel
+    rm -rf /tmp/yay
     git clone https://aur.archlinux.org/yay.git /tmp/yay
     (cd /tmp/yay && makepkg -si --noconfirm)
     rm -rf /tmp/yay
@@ -122,23 +123,31 @@ fi
 # zoxide - 官方安装脚本
 if ! command -v zoxide &>/dev/null; then
     echo "安装 zoxide..."
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o /tmp/install_zoxide.sh
+    bash /tmp/install_zoxide.sh
+    rm -f /tmp/install_zoxide.sh
 fi
 
 # atuin - 官方安装脚本
 if ! command -v atuin &>/dev/null; then
     echo "安装 atuin..."
-    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh -o /tmp/install_atuin.sh
+    bash /tmp/install_atuin.sh
+    rm -f /tmp/install_atuin.sh
 fi
 
 # fasd - 从源码安装
 if ! command -v fasd &>/dev/null; then
     echo "安装 fasd..."
+    rm -rf /tmp/fasd
     git clone https://github.com/clvv/fasd.git /tmp/fasd
     sudo make -C /tmp/fasd install
     rm -rf /tmp/fasd
 fi
 
+{{ else -}}
+echo "ERROR: 不支持的操作系统，请手动安装依赖包" >&2
+exit 1
 {{ end -}}
 
 echo "==> [10-packages] 完成 ✓"
