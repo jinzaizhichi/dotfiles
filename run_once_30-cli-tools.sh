@@ -54,7 +54,7 @@ if [ ! -d "$HOME/.pyenv" ]; then
         echo "macOS: pyenv 已由 brew 安装，跳过"
     else
         echo "安装 pyenv..."
-        curl https://pyenv.run -o /tmp/install_pyenv.sh
+        curl --proto '=https' --tlsv1.2 -fsSL https://pyenv.run -o /tmp/install_pyenv.sh
         bash /tmp/install_pyenv.sh
         rm -f /tmp/install_pyenv.sh
     fi
