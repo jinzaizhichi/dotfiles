@@ -1,0 +1,50 @@
+#!/bin/bash
+# zsh 插件安装脚本
+# 为什么用 run_onchange_：插件版本更新时自动重装，run_once_ 做不到这点
+#
+# === 插件版本锁定（修改此处会触发重新安装）===
+# zsh-autosuggestions: main
+# powerlevel10k: master（仅 Ubuntu/WSL2）
+# =============================================
+set -euo pipefail
+
+echo "==> [40-zsh-plugins] 安装/更新 zsh 插件..."
+
+OMZ_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+# 如果 oh-my-zsh 还没装好就退出（理论上不会发生，因为脚本有序执行）
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "oh-my-zsh 未找到，跳过插件安装"
+    exit 0
+fi
+
+# ============================================================
+# zsh-autosuggestions（所有平台）
+# ============================================================
+AUTOSUGGESTIONS_DIR="$OMZ_CUSTOM/plugins/zsh-autosuggestions"
+if [ ! -d "$AUTOSUGGESTIONS_DIR" ]; then
+    echo "安装 zsh-autosuggestions..."
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$AUTOSUGGESTIONS_DIR"
+else
+    echo "更新 zsh-autosuggestions..."
+    git -C "$AUTOSUGGESTIONS_DIR" pull --ff-only
+fi
+
+# ============================================================
+# powerlevel10k（仅 Ubuntu/WSL2）
+# Arch 用 pacman 安装的系统包，macOS 用 brew 安装
+# ============================================================
+{{- if not .isArch }}
+{{- if not .isMac }}
+P10K_DIR="$OMZ_CUSTOM/themes/powerlevel10k"
+if [ ! -d "$P10K_DIR" ]; then
+    echo "安装 powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
+else
+    echo "更新 powerlevel10k..."
+    git -C "$P10K_DIR" pull --ff-only
+fi
+{{- end }}
+{{- end }}
+
+echo "==> [40-zsh-plugins] 完成 ✓"
