@@ -289,3 +289,6 @@ backup-projects() {
     
     echo "✅ 备份完成: $backup_dir"
 }
+
+# Vibe-Trading 启动（使用 LongCat API，避免被全局 OPENAI_API_KEY 覆盖）
+alias vibe-trading='OPENAI_API_KEY=$(pass show vibe-trading/api_key) OPENAI_BASE_URL=$(pass show vibe-trading/base_url) LANGCHAIN_MODEL_NAME=$(pass show vibe-trading/model) vibe-trading'
