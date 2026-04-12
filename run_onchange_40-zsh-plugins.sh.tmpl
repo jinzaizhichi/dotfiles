@@ -30,12 +30,12 @@ else
     git -C "$AUTOSUGGESTIONS_DIR" pull --ff-only
 fi
 
+{{- if not .isArch }}
+{{- if not .isMac }}
 # ============================================================
 # powerlevel10k（仅 Ubuntu/WSL2）
 # Arch 用 pacman 安装的系统包，macOS 用 brew 安装
 # ============================================================
-{{- if not .isArch }}
-{{- if not .isMac }}
 P10K_DIR="$OMZ_CUSTOM/themes/powerlevel10k"
 if [ ! -d "$P10K_DIR" ]; then
     echo "安装 powerlevel10k..."
