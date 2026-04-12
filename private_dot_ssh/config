@@ -1,0 +1,18 @@
+# Sample ssh_config file
+#
+Host Aliyun
+    HostName 121.43.32.237
+    User root
+    Port 22
+    IdentityFile ~/.ssh/aliyun-hangzhou.pem
+Host Lance
+    HostName 91.230.73.42
+    User jinzaizhichi
+    Port 2222
+    IdentityFile ~/.ssh/lance
+
+Host github.com
+  Hostname ssh.github.com
+  Port 443
+  User git
+
