@@ -48,6 +48,12 @@ gpg --import your-private-key.asc
 chezmoi init --apply https://github.com/jinzaizhichi/dotfiles.git
 ```
 
+Zsh 依赖 oh-my-zsh，chezmoi apply 完成后需单独安装：
+
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+```
+
 ## 日常使用
 
 ```bash
