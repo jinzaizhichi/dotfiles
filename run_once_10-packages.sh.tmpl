@@ -1,0 +1,144 @@
+#!/bin/bash
+# 系统包安装脚本
+# 为什么用 run_once_：包管理器安装只需做一次，后续用 update 命令维护
+set -e
+
+echo "==> [10-packages] 安装系统包..."
+
+{{ if .isMac -}}
+# ============================================================
+# macOS - Homebrew
+# ============================================================
+
+# 安装 Homebrew（如果不存在）
+if ! command -v brew &>/dev/null; then
+    echo "安装 Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# 安装核心工具
+brew install \
+    git curl wget \
+    zsh neovim \
+    fzf zoxide direnv \
+    atuin fasd \
+    ripgrep fd bat eza \
+    htop jq \
+    pass gnupg \
+    gh \
+    pyenv
+
+{{ else if .isArch -}}
+# ============================================================
+# Arch Linux - pacman + yay
+# ============================================================
+
+# 确保 yay 已安装（AUR helper）
+if ! command -v yay &>/dev/null; then
+    echo "安装 yay..."
+    sudo pacman -S --noconfirm --needed git base-devel
+    git clone https://aur.archlinux.org/yay.git /tmp/yay
+    (cd /tmp/yay && makepkg -si --noconfirm)
+    rm -rf /tmp/yay
+fi
+
+# pacman 官方源
+sudo pacman -S --noconfirm --needed \
+    git curl wget \
+    zsh neovim \
+    fzf direnv \
+    ripgrep fd bat eza \
+    htop jq \
+    pass gnupg \
+    github-cli
+
+# AUR 包
+yay -S --noconfirm --needed \
+    zoxide \
+    atuin \
+    fasd
+
+{{ else if .isUbuntu -}}
+# ============================================================
+# Ubuntu / WSL2 - apt + 手动安装
+# ============================================================
+
+sudo apt-get update -qq
+
+# 核心工具（apt 直接安装）
+sudo apt-get install -y \
+    git curl wget \
+    zsh \
+    fzf direnv \
+    ripgrep fd-find bat \
+    htop jq \
+    pass gnupg \
+    software-properties-common apt-transport-https ca-certificates
+
+# fd 在 Ubuntu 里叫 fd-find，建立软链
+if ! command -v fd &>/dev/null && command -v fdfind &>/dev/null; then
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
+fi
+
+# bat 在 Ubuntu 里叫 batcat，建立软链
+if ! command -v bat &>/dev/null && command -v batcat &>/dev/null; then
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+fi
+
+# neovim - 使用官方 unstable PPA 获取最新版
+if ! command -v nvim &>/dev/null; then
+    echo "安装 neovim..."
+    sudo add-apt-repository -y ppa:neovim-ppa/unstable
+    sudo apt-get update -qq
+    sudo apt-get install -y neovim
+fi
+
+# GitHub CLI - 使用官方 apt 源
+if ! command -v gh &>/dev/null; then
+    echo "安装 GitHub CLI..."
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt-get update -qq
+    sudo apt-get install -y gh
+fi
+
+# eza - 官方安装方式
+if ! command -v eza &>/dev/null; then
+    echo "安装 eza..."
+    sudo apt-get install -y gpg
+    sudo mkdir -p /etc/apt/keyrings
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
+        | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
+        | sudo tee /etc/apt/sources.list.d/gierens.list
+    sudo apt-get update -qq
+    sudo apt-get install -y eza
+fi
+
+# zoxide - 官方安装脚本
+if ! command -v zoxide &>/dev/null; then
+    echo "安装 zoxide..."
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+fi
+
+# atuin - 官方安装脚本
+if ! command -v atuin &>/dev/null; then
+    echo "安装 atuin..."
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+fi
+
+# fasd - 从源码安装
+if ! command -v fasd &>/dev/null; then
+    echo "安装 fasd..."
+    git clone https://github.com/clvv/fasd.git /tmp/fasd
+    sudo make -C /tmp/fasd install
+    rm -rf /tmp/fasd
+fi
+
+{{ end -}}
+
+echo "==> [10-packages] 完成 ✓"
