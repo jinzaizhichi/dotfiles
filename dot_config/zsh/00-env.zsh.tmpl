@@ -76,8 +76,7 @@ export AWS_SECRET_ACCESS_KEY="$(pass show aws/jinzaizhichi/aws_secret_access_key
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
 
-# Node.js
-export NPM_CONFIG_PREFIX="$HOME/.npm-global"
+# Node.js（版本由 nvm 管理，不设 NPM_CONFIG_PREFIX 避免冲突）
 export NODE_REPL_HISTORY="$XDG_DATA_HOME/node_repl_history"
 
 # Rust

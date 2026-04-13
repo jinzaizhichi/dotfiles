@@ -107,7 +107,9 @@ eval "$(direnv hook zsh)"
 
 {{- if lookPath "zoxide" }}
 eval "$(zoxide init zsh)"
-alias cd='z'  # 替换 cd
+
+alias j='z'    # 跳转目录
+alias jj='zi'  # 交互式跳转（配合 fzf）
 {{- end }}
 
 # ============================================
@@ -139,8 +141,8 @@ source "$HOME/.openclaw/completions/openclaw.zsh"
 # nvm - Node Version Manager
 # ============================================
 
-{{- if stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
-export NVM_DIR="$HOME/.nvm"
+{{- if stat (joinPath .chezmoi.homeDir ".config/nvm/nvm.sh") }}
+export NVM_DIR="$HOME/.config/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 {{- end }}
@@ -216,8 +218,14 @@ alias aws-login='export AWS_ACCESS_KEY_ID=$(pass show aws/jinzaizhichi/aws_acces
 # ============================================
 
 {{- if lookPath "gh" }}
-# GitHub CLI 补全
-eval "$(gh completion -s zsh)"
+# GitHub CLI 补全（缓存到文件，避免每次启动都执行）
+_gh_completion_cache="$HOME/.cache/zsh/gh_completion.zsh"
+if [[ ! -f "$_gh_completion_cache" || "$commands[gh]" -nt "$_gh_completion_cache" ]]; then
+    mkdir -p "${_gh_completion_cache:h}"
+    gh completion -s zsh >| "$_gh_completion_cache"
+fi
+source "$_gh_completion_cache"
+unset _gh_completion_cache
 {{- end }}
 
 # ============================================
