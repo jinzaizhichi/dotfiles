@@ -125,6 +125,6 @@ export IS_MAC=1
 {{- end }}
 
 # Vibe-Trading (LongCat)
-export VIBE_TRADING_BASE_URL="$(pass show vibe-trading/base_url)"
-export VIBE_TRADING_API_KEY="$(pass show vibe-trading/api_key)"
-export VIBE_TRADING_MODEL="$(pass show vibe-trading/model)"
+export VIBE_TRADING_BASE_URL="$(pass show vibe-trading/base_url 2>/dev/null || echo '')"
+export VIBE_TRADING_API_KEY="$(pass show vibe-trading/api_key 2>/dev/null || echo '')"
+export VIBE_TRADING_MODEL="$(pass show vibe-trading/model 2>/dev/null || echo '')"
