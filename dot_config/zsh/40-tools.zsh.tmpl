@@ -66,16 +66,6 @@ bindkey '^r' _atuin_search_widget  # Ctrl+R 搜索历史
 {{- end }}
 
 # ============================================
-# broot - 目录导航
-# ============================================
-
-{{- if lookPath "br" }}
-# broot 启动器
-[ -f "$HOME/.config/broot/launcher/bash/br" ] && \
-    source "$HOME/.config/broot/launcher/bash/br"
-{{- end }}
-
-# ============================================
 # fzf - 模糊查找
 # ============================================
 
