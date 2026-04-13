@@ -4,39 +4,12 @@
 # ============================================
 
 # ============================================
-# Oh My Zsh 插件配置
+# 按键绑定
 # ============================================
-
-# 插件列表
-plugins=(
-    git
-    zsh-autosuggestions
-{{- if .isArch }}
-    fasd
-{{- end }}
-{{- if .isMac }}
-    brew
-    macos
-{{- end }}
-{{- if .isWSL }}
-    # WSL 特定插件
-{{- end }}
-)
-
-# zsh-autosuggestions 设置
 bindkey '^j' autosuggest-accept      # Ctrl+J 接受建议
 bindkey '^k' autosuggest-execute     # Ctrl+K 执行建议
 bindkey -s '\e\e' '\C-asudo \C-e'    # ESC ESC 添加 sudo
 bindkey '^x' kill-line               # Ctrl+X 删除到行尾
-
-# ============================================
-# Powerlevel10k Instant Prompt
-# ============================================
-
-# 启用 Powerlevel10k instant prompt
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
 
 # ============================================
 # fasd - 快速跳转
@@ -265,9 +238,6 @@ fi
 
 # 加载 p10k 配置
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# Powerlevel10k Instant Prompt 设置
-typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 # ============================================
 # 历史记录设置
