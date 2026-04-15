@@ -265,12 +265,13 @@ alias json='python3 -m json.tool'
 # 查看天气
 alias weather='curl wttr.in'
 alias weather-cn='curl wttr.in/Beijing'
-
+alias lf='curl -s "wttr.in/Linfen?m&lang=zh-cn"'
+alias fs='curl -s "wttr.in/Fushan+Linfen?m&lang=zh-cn"'
 # 生成密码
 alias genpass='openssl rand -base64 32'
 
 # 颜色测试
-alias colors='for i in {0..255}; do echo -e "\e[38;5;${i}m${i}"; done | column -c 80 -s " "; echo -e "\e[m"'
+alias colortest='for i in {0..255}; do echo -e "\e[38;5;${i}m${i}"; done | column -c 80 -s " "; echo -e "\e[m"'
 
 # 清理下载目录
 alias cleandl='find ~/Downloads -type f -atime +30 -delete'
@@ -279,3 +280,5 @@ alias cleandl='find ~/Downloads -type f -atime +30 -delete'
 alias shred='shred -vfz -n 10'
 
 # 快速备份
+
+

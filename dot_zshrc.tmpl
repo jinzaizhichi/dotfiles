@@ -10,6 +10,7 @@
 # ============================================
 
 # ============================================
+# ============================================
 # Powerlevel10k Instant Prompt（必须在任何输出之前）
 # ============================================
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
@@ -37,6 +38,9 @@ plugins=(
 )
 
 # 加载 Oh My Zsh
+# 提前设置 LS_COLORS，绕过 WSL2 下 source <(dircolors) 的 /proc/self/fd 报错
+[[ -z "$LS_COLORS" ]] && eval $(dircolors -b)
+unalias colors 2>/dev/null  # 防止自定义 colors alias 干扰 OMZ 初始化
 source $ZSH/oh-my-zsh.sh
 
 # ============================================
@@ -94,3 +98,7 @@ echo "👋 Welcome {{ .name }}!"
 
 # 提示可用的快捷命令
 # echo "💡 Tips: cdtv | cdopt | gs | docker-cleanup | pyproject"
+# 每次开机/打开新标签页显示浮山天气
+if [[ -n "$PS1" ]]; then
+  curl -s "wttr.in/Fushan+Linfen?m0&lang=zh-cn"
+fi
