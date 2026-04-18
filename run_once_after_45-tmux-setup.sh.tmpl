@@ -1,0 +1,17 @@
+{{ if (or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin")) -}}
+#!/usr/bin/env bash
+
+TPM_DIR="$HOME/.tmux/plugins/tpm"
+
+# 1. 安装 TPM
+if [ ! -d "$TPM_DIR" ]; then
+    echo ">>>> Installing TPM..."
+    git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
+fi
+
+# 2. 静默安装插件
+if command -v tmux &> /dev/null; then
+    echo ">>>> Installing Tmux plugins..."
+    "$TPM_DIR/bin/install_plugins"
+fi
+{{ end -}}
