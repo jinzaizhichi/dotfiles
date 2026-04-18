@@ -45,10 +45,11 @@ bind -n M-L next-window
 # --- Vi 模式 ---
 set-window-option -g mode-keys vi
 set -g set-clipboard on
+
+# 复制时强制用 xclip 写入系统剪贴板（处理 UTF-8）
 bind -T copy-mode-vi v send-keys -X begin-selection
 bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
-bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"
 # --- 插件列表 ---
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
