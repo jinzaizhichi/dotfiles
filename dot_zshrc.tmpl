@@ -99,6 +99,12 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
 # 提示可用的快捷命令
 # echo "💡 Tips: cdtv | cdopt | gs | docker-cleanup | pyproject"
 # 每次开机/打开新标签页显示浮山天气
-if [[ -n "$PS1" ]]; then
-  curl -s "wttr.in/Fushan+Linfen?m0&lang=zh-cn"
-fi
+#if [[ -n "$PS1" ]]; then
+#  curl -s "wttr.in/Fushan+Linfen?m0&lang=zh-cn"
+#fi
+weather_panel() {
+  tput rmam
+  trap "tput smam" EXIT
+  curl -s 'wttr.in/Fushan,Shanxi?A&m&lang=zh'
+}
+weather_panel
