@@ -1,5 +1,5 @@
 [user]
-	email = {{ .email | quote}} 
+	email = {{ .email | quote}}
 	name = {{ .name}}
 	signingkey = {{ .email}}
 [commit]
@@ -7,3 +7,12 @@
 [github]
 	signingkey = {{ .email}}
 	token = {{ pass "github/api/token" }}
+[core]
+	pager = delta
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+	syntax-theme = gruvbox-dark
+[interactive]
+	diffFilter = delta --color-only
