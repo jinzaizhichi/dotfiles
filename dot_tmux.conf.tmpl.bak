@@ -14,6 +14,11 @@ setw -q -g utf8 on
 set -g default-terminal "tmux-256color"
 
 ## --- 快捷键 ---
+#unbind C-b
+#set -g prefix C-Space
+#bind C-Space send-prefix
+#bind r source-file ~/.tmux.conf \; display "Config Reloaded!"
+
 # 解绑所有可能冲突的前缀
 unbind C-Space
 unbind C-b
@@ -24,6 +29,11 @@ bind C-b send-prefix
 # 快速重载配置 (Prefix + r)
 bind r source-file ~/.tmux.conf \; display "Config Reloaded!"
 
+# --- 针对乱码的图标修正 ---
+# 既然你装了 JetBrainsMono Nerd Font，我们用更稳健的符号
+set -g @catppuccin_date_time_icon "󱑒 "
+set -g @catppuccin_status_left_separator ""
+set -g @catppuccin_status_right_separator ""
 # 拆分窗格保持路径
 bind '"' split-window -v -c "#{pane_current_path}"
 bind % split-window -h -c "#{pane_current_path}"
@@ -40,41 +50,18 @@ set -g set-clipboard on
 bind -T copy-mode-vi v send-keys -X begin-selection
 bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
 bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"
-
-# --- 天气 Custom Module（必须在 catppuccin 插件加载前定义）---
-# wttr.in 每 30 分钟刷新一次，format=3 输出单行紧凑格式，如：Fushan: ⛅ +18°C
-%hidden MODULE_NAME="weather"
-set -g "@catppuccin_${MODULE_NAME}_icon" "󰖐 "
-set -gF "@catppuccin_${MODULE_NAME}_color" "#{E:@thm_teal}"
-set -g "@catppuccin_${MODULE_NAME}_text" "#(curl -s 'wttr.in/Fushan,Shanxi?format=3&m&lang=zh' 2>/dev/null)"
-source "~/.tmux/plugins/catppuccin/tmux/utils/status_module.conf"
-
 # --- 插件列表 ---
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'christoomey/vim-tmux-navigator'
-set -g @plugin 'catppuccin/tmux#v2.3.0'
+set -g @plugin 'dreamsofcode-io/catppuccin-tmux'
 set -g @plugin 'tmux-plugins/tmux-yank'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 
-# --- Catppuccin 主题配置（新版语法）---
-set -g @catppuccin_flavor 'mocha'
-set -g @catppuccin_window_status_style "rounded"
-
-# --- Status Bar 布局 ---
-set -g status-right-length 150
-set -g status-left-length 100
-
-# 左侧：session 名
-set -g status-left "#{E:@catppuccin_status_session}"
-
-# 右侧：天气 + 日期时间
-set -g status-right "#{E:@catppuccin_status_weather}"
-set -ag status-right "#{E:@catppuccin_status_date_time}"
-set -g @catppuccin_date_time_text "%Y-%m-%d %a %H:%M"
-
-# --- 持久化 ---
+# 主题与时间 (24h + 星期)
+set -g @catppuccin_flavour 'mocha'
+set -g @catppuccin_date_time "%Y-%m-%d %a %H:%M"
 set -g @continuum-restore 'on'
 
 # --- 自动安装 TPM 逻辑 ---
