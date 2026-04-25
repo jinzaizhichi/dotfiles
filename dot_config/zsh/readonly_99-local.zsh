@@ -17,3 +17,5 @@
 
 # 示例：临时测试的配置
 # export TEST_VAR="test"
+# DeepSeek api-key
+export DEEPSEEK_API_KEY=$(pass deepseek/api-key 2>/dev/null)
