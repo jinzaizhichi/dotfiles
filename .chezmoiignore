@@ -1,0 +1,14 @@
+# 编辑器临时文件
+*.swp
+*.swo
+*~
+*.bak
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+
+# Claude Code 内部目录
+.claude/

@@ -47,21 +47,30 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 
 # ============================================
 # 安全：API Keys 使用 pass 管理
+# 批量循环读取，避免多次重复 fork
 # ============================================
 
 {{- if lookPath "pass" }}
-# OpenAI API Key（从 pass 读取）
-export OPENAI_API_KEY="$(pass show openai/api 2>/dev/null || echo '')"
-
-# Gemini API Key（从 pass 读取）
-export GEMINI_API_KEY="$(pass show google/gemini/api 2>/dev/null || echo '')"
-
-# IPInfo API Key（从 pass 读取）
-export IPINFO_API_KEY="$(pass show IPinfo/apikey 2>/dev/null || echo '')"
-
-# AWS Credentials（通过 pass 读取）
-export AWS_ACCESS_KEY_ID="$(pass show aws/jinzaizhichi/aws_access_key_id 2>/dev/null || echo '')"
-export AWS_SECRET_ACCESS_KEY="$(pass show aws/jinzaizhichi/aws_secret_access_key 2>/dev/null || echo '')"
+_chezmoi_pass_keys() {
+  local key_map=(
+    "openai/api:OPENAI_API_KEY"
+    "google/gemini/api:GEMINI_API_KEY"
+    "IPinfo/apikey:IPINFO_API_KEY"
+    "aws/jinzaizhichi/aws_access_key_id:AWS_ACCESS_KEY_ID"
+    "aws/jinzaizhichi/aws_secret_access_key:AWS_SECRET_ACCESS_KEY"
+    "vibe-trading/base_url:VIBE_TRADING_BASE_URL"
+    "vibe-trading/api_key:VIBE_TRADING_API_KEY"
+    "vibe-trading/model:VIBE_TRADING_MODEL"
+  )
+  for entry in "${key_map[@]}"; do
+    local pass_path="${entry%%:*}"
+    local env_var="${entry##*:}"
+    local val
+    val="$(pass show "$pass_path" 2>/dev/null)" && export "$env_var"="$val"
+  done
+}
+_chezmoi_pass_keys
+unset -f _chezmoi_pass_keys
 {{- else }}
 # pass 未安装，使用环境变量
 # 警告：不要在此文件中硬编码 API Keys
@@ -120,14 +129,13 @@ export IS_ARCH=1
 export IS_UBUNTU=1
 {{- end }}
 
+{{- if .isDebian }}
+export IS_DEBIAN=1
+{{- end }}
+
 {{- if .isMac }}
 export IS_MAC=1
 {{- end }}
-
-# Vibe-Trading (LongCat)
-export VIBE_TRADING_BASE_URL="$(pass show vibe-trading/base_url 2>/dev/null || echo '')"
-export VIBE_TRADING_API_KEY="$(pass show vibe-trading/api_key 2>/dev/null || echo '')"
-export VIBE_TRADING_MODEL="$(pass show vibe-trading/model 2>/dev/null || echo '')"
 
 # Futu OpenAPI（使用 VPS 上的 OpenD，按需自动建 SSH 隧道）
 export FUTU_SSH_TUNNEL="Lance"

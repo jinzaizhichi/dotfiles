@@ -4,7 +4,7 @@
 #
 # === 插件版本锁定（修改此处会触发重新安装）===
 # zsh-autosuggestions: main
-# powerlevel10k: master（仅 Ubuntu/WSL2）
+# powerlevel10k: master（Ubuntu/Debian/WSL，非 pacman/brew 系统）
 # =============================================
 set -euo pipefail
 
@@ -33,7 +33,7 @@ fi
 {{- if not .isArch }}
 {{- if not .isMac }}
 # ============================================================
-# powerlevel10k（仅 Ubuntu/WSL2）
+# powerlevel10k（Ubuntu/Debian/WSL，非 pacman/brew 系统）
 # Arch 用 pacman 安装的系统包，macOS 用 brew 安装
 # ============================================================
 P10K_DIR="$OMZ_CUSTOM/themes/powerlevel10k"

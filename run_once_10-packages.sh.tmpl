@@ -147,6 +147,87 @@ if ! command -v fasd &>/dev/null; then
     rm -rf /tmp/fasd
 fi
 
+{{ else if .isDebian -}}
+# ============================================================
+# Debian - apt + 手动安装（无 PPA，直接用官方源）
+# ============================================================
+
+sudo apt-get update -qq
+
+# 核心工具（apt 直接安装）
+# Debian 13 官方源有较新版本，大部分不需要额外 repo
+sudo apt-get install -y \
+    git curl wget \
+    zsh neovim \
+    fzf direnv \
+    ripgrep fd-find bat \
+    htop jq \
+    pass gnupg \
+    make build-essential \
+    unzip \
+    apt-transport-https ca-certificates
+
+# fd → fd-find 软链
+if ! command -v fd &>/dev/null && command -v fdfind &>/dev/null; then
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
+fi
+
+# bat → batcat 软链
+if ! command -v bat &>/dev/null && command -v batcat &>/dev/null; then
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+fi
+
+# GitHub CLI - 官方 apt 源
+if ! command -v gh &>/dev/null; then
+    echo "安装 GitHub CLI..."
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt-get update -qq
+    sudo apt-get install -y gh
+fi
+
+# eza - 官方 deb 源
+if ! command -v eza &>/dev/null; then
+    echo "安装 eza..."
+    sudo apt-get install -y gpg
+    sudo mkdir -p /etc/apt/keyrings
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
+        | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
+        | sudo tee /etc/apt/sources.list.d/gierens.list
+    sudo apt-get update -qq
+    sudo apt-get install -y eza
+fi
+
+# zoxide - 官方安装脚本
+if ! command -v zoxide &>/dev/null; then
+    echo "安装 zoxide..."
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o /tmp/install_zoxide.sh
+    bash /tmp/install_zoxide.sh
+    rm -f /tmp/install_zoxide.sh
+fi
+
+# atuin - 官方安装脚本
+if ! command -v atuin &>/dev/null; then
+    echo "安装 atuin..."
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh -o /tmp/install_atuin.sh
+    bash /tmp/install_atuin.sh
+    rm -f /tmp/install_atuin.sh
+fi
+
+# fasd - 从源码安装（AUR 以外唯一方式）
+if ! command -v fasd &>/dev/null; then
+    echo "安装 fasd..."
+    rm -rf /tmp/fasd
+    git clone https://github.com/clvv/fasd.git /tmp/fasd
+    sudo make -C /tmp/fasd install
+    rm -rf /tmp/fasd
+fi
+
 {{ else -}}
 echo "ERROR: 不支持的操作系统，请手动安装依赖包" >&2
 exit 1

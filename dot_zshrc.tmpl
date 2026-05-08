@@ -90,6 +90,8 @@ echo "🐧 WSL2 Arch Linux - Welcome {{ .name }}!"
 echo "🐧 Arch Linux - Welcome {{ .name }}!"
 {{- else if .isUbuntu }}
 echo "🐧 Ubuntu - Welcome {{ .name }}!"
+{{- else if .isDebian }}
+echo "🐧 Debian - Welcome {{ .name }}!"
 {{- else if .isMac }}
 echo "🍎 macOS - Welcome {{ .name }}!"
 {{- else }}
