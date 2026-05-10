@@ -102,6 +102,28 @@ git commit -m "chore: ..."
 git push
 ```
 
+## Claude Code 模型供应商切换
+
+`~/.config/zsh/99-local.zsh` 内置 `switch-model` 函数，支持在多个 AI 供应商间一键切换（重启 Claude Code 生效）：
+
+```bash
+# 默认启动使用 DeepSeek
+switch-model deepseek    # → api.deepseek.com/anthropic (deepseek-v4-pro / v4-flash)
+switch-model anthropic   # → api.apikey.fun (claude-opus-4-7)
+
+# 查看当前供应商
+echo $ANTHROPIC_BASE_URL
+```
+
+供应商配置：
+
+| 供应商 | API 地址 | Opus/Sonnet | Haiku | Key 来源 |
+|--------|---------|-------------|-------|----------|
+| deepseek | api.deepseek.com/anthropic | deepseek-v4-pro | deepseek-v4-flash | `pass deepseek/api-key` |
+| anthropic | api.apikey.fun | claude-opus-4-7 | claude-opus-4-7 | `pass apikey-fun/api-key` |
+
+新增供应商只需在 `99-local.zsh` 的 `_claude_model_setup` 函数中添加一个 case 分支。
+
 ## 安全说明
 
 - API Keys 通过 [pass](https://www.passwordstore.org/) 读取，不硬编码在配置中
