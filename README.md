@@ -90,30 +90,122 @@ sh -c "$(curl -fsLS get.chezmoi.io)"
 
 `run_once_*` 脚本自动装系统包、oh-my-zsh、nvm/bun/rustup/pyenv；`chezmoiexternal` 自动拉取 TPM、zsh-autosuggestions、powerlevel10k（每周刷新）。
 
-## 日常使用
+## 使用方法
+
+### 1. 编辑与应用
 
 ```bash
-# 编辑配置文件
+# 编辑共享配置（chezmoi 会打开仓库内的源文件）
 chezmoi edit ~/.config/zsh/20-aliases.zsh
 
-# 预览变更
+# 编辑机器本地配置（不会同步到远程）
+nvim ~/.config/zsh/99-local.zsh
+
+# 预览将要应用的变更
 chezmoi diff
 
-# 应用变更到家目录
-chezmoi apply
+# 真正应用到家目录
+chezmoi apply -v
 
-# 强制刷新外部资源（TPM/插件）
-chezmoi apply --refresh-externals
+# 跳过外部资源（TPM/插件）的网络拉取，加快迭代
+chezmoi diff --exclude=externals
+chezmoi apply --exclude=externals -v
+```
 
+### 2. 新增项目（数据驱动）
+
+只改一处即可生效：在 `.chezmoidata/projects.toml` 末尾追加：
+
+```toml
+[[projects]]
+alias = "blog"
+dir   = "my-blog"
+desc  = "个人博客"
+```
+
+`chezmoi apply` 后自动得到 `cdblog` 别名。
+
+### 3. 修改 VPS / 主机信息
+
+`.chezmoidata/hosts.toml` 是单一真源。改 IP/端口/用户后：
+
+```bash
+chezmoi apply -v          # ~/.ssh/config 和 zsh 函数自动同步
+```
+
+涉及的文件：`~/.ssh/config`、`ssh-vps`、`sync-to-vps`、`nginx-access/error`、`FUTU_SSH_TUNNEL` 等。
+
+### 4. 机器本地配置
+
+需要写当前机器才用得上的 API key 引用 / 别名 / 函数？
+
+```bash
+nvim ~/.config/zsh/99-local.zsh
+```
+
+- 此文件由 `create_99-local.zsh.tmpl` 首次生成，之后**不会被 apply 覆盖**
+- 不会同步到远程仓库
+- 重装机器时会从模板重新生成默认内容
+
+### 5. 同步与提交
+
+```bash
 # 拉取远程最新配置并应用
 chezmoi update
 
-# 提交到远程
+# 进入仓库目录提交本地修改
 chezmoi cd
 git add .
-git commit -m "chore: ..."
+git commit -m "feat: ..."
 git push
+exit
 ```
+
+### 6. 外部资源（TPM / zsh 插件）
+
+由 `.chezmoiexternal.toml.tmpl` 管理，每 168h（7 天）自动检查更新。
+
+```bash
+# 查看 chezmoi 管理的外部资源
+chezmoi managed --include=externals
+
+# 强制刷新（不等 7 天）
+chezmoi apply --refresh-externals
+```
+
+### 7. 模板调试
+
+```bash
+# 测试模板变量是否能正确取到
+chezmoi execute-template '{{ .hosts.lance.ip }}'
+chezmoi execute-template '{{ range .projects }}{{ .alias }} {{ end }}'
+
+# 查看渲染后的某个文件（不写入磁盘）
+chezmoi cat ~/.ssh/config
+
+# 全量列出 chezmoi 会管理的文件
+chezmoi managed
+```
+
+### 8. 常用别名（dot_zshrc 导入后可用）
+
+| 别名 | 等价命令 |
+|------|---------|
+| `cm` | `chezmoi` |
+| `cma` | `chezmoi apply` |
+| `cme` | `chezmoi edit` |
+| `cmcd` | `chezmoi cd` |
+| `cmu` | `chezmoi update` |
+
+### 9. 故障排查
+
+| 现象 | 排查 |
+|------|------|
+| `chezmoi diff` 卡住 | 通常是 externals 网络慢，加 `--exclude=externals` |
+| `pass: error` | pass 密码库没就绪，参考"快速开始"第三步 |
+| GPG 解密失败 | 确认 `gpg --list-secret-keys` 有对应私钥 |
+| zsh 启动慢 | `time zsh -i -c exit` 测耗时；逐个注释 `40-tools.zsh` 排查 |
+| `cdxxx` 别名失效 | 检查 `.chezmoidata/projects.toml` 后是否 `chezmoi apply` |
 
 ## 架构特性
 
