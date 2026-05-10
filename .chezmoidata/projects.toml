@@ -1,0 +1,30 @@
+# chezmoi 静态数据：项目路径与别名
+#
+# 新增项目只需在此添加一项，zsh 别名与跳转函数会自动生成。
+
+projects_root = "~/projects"
+
+[[projects]]
+alias = "tv"
+dir = "tv-chart"
+desc = "TradingView 图表"
+
+[[projects]]
+alias = "opt"
+dir = "options-tracker"
+desc = "期权追踪器"
+
+[[projects]]
+alias = "bot"
+dir = "tg-bot"
+desc = "Telegram 机器人"
+
+[[projects]]
+alias = "wx"
+dir = "wechat-account"
+desc = "微信公众号"
+
+[[projects]]
+alias = "site"
+dir = "jinzaizhichi.cn"
+desc = "淘宝联盟网站"

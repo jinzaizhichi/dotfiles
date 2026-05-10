@@ -230,15 +230,13 @@ alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
 {{- end }}
 
 # ============================================
-# 项目快捷跳转
+# 项目快捷跳转（由 .chezmoidata/projects.toml 驱动）
 # ============================================
 
-alias cdtv='cd ~/projects/tv-chart'
-alias cdopt='cd ~/projects/options-tracker'
-alias cdbot='cd ~/projects/tg-bot'
-alias cdwx='cd ~/projects/wechat-account'
-alias cdsite='cd ~/projects/jinzaizhichi.cn'
-alias cdproj='cd ~/projects'
+{{- range .projects }}
+alias cd{{ .alias }}='cd {{ $.projects_root }}/{{ .dir }}'
+{{- end }}
+alias cdproj='cd {{ .projects_root }}'
 
 # ============================================
 # Chezmoi 别名

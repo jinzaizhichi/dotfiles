@@ -1,0 +1,21 @@
+# ============================================
+# 本地机器专属配置（99-local.zsh）
+#
+# create_ 前缀：chezmoi 仅在文件不存在时生成。
+# 生成后由用户自由修改，不会被 apply 覆盖。
+#
+# 在此写入不想提交到 Git 的机器特定内容：
+#   - 临时测试的环境变量/别名
+#   - 当前机器才需要的工作流函数
+#   - 触发 source 外部脚本（例如 claude-config）
+# ============================================
+
+# DeepSeek API key（通过 pass 取，不落盘）
+{{- if lookPath "pass" }}
+export DEEPSEEK_API_KEY="$(pass deepseek/opencode/api-key 2>/dev/null)"
+{{- end }}
+
+# Claude Code 模型供应商切换（如果 claude-config 仓库存在）
+if [[ -f "$HOME/claude-config/scripts/switch-model.sh" ]]; then
+  source "$HOME/claude-config/scripts/switch-model.sh"
+fi

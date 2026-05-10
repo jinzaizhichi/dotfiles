@@ -138,5 +138,5 @@ export IS_MAC=1
 {{- end }}
 
 # Futu OpenAPI（使用 VPS 上的 OpenD，按需自动建 SSH 隧道）
-export FUTU_SSH_TUNNEL="Lance"
-export FUTU_SSH_REMOTE_PORT="11112"
+export FUTU_SSH_TUNNEL="{{ .hosts.lance.alias }}"
+export FUTU_SSH_REMOTE_PORT="{{ .hosts.lance.futu_opend_port }}"

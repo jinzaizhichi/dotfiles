@@ -1,0 +1,34 @@
+# chezmoi externals: 声明式外部资源管理
+#
+# 与 run_onchange_ 脚本相比：
+#   - 声明式（一个表项代替一段 shell）
+#   - 自动 refreshPeriod 周期性更新（168h = 7 天）
+#   - chezmoi apply --refresh-externals 强制刷新
+#   - 失败时 chezmoi 会报错，不会静默
+#
+# 说明：
+#   - TPM 所有平台共用
+#   - zsh-autosuggestions 所有平台共用（Arch/macOS 虽有包管理器版本，
+#     但 Oh My Zsh custom 路径优先级更高，统一来源更可控）
+#   - powerlevel10k 仅在非 pacman/brew 系统安装到 custom 路径，
+#     其他系统由 packages 脚本装到系统路径
+#   - oh-my-zsh 本身由 run_once_20-oh-my-zsh.sh 安装（需要 KEEP_ZSHRC 等环境变量，
+#     无法用 externals 表达）
+
+[".tmux/plugins/tpm"]
+    type = "git-repo"
+    url = "https://github.com/tmux-plugins/tpm.git"
+    refreshPeriod = "168h"
+
+[".oh-my-zsh/custom/plugins/zsh-autosuggestions"]
+    type = "git-repo"
+    url = "https://github.com/zsh-users/zsh-autosuggestions.git"
+    refreshPeriod = "168h"
+
+{{- /* p10k 在无 pacman/brew 的系统上从源码装 */ -}}
+{{- if and (ne .chezmoi.osRelease.id "arch") (ne .chezmoi.os "darwin") }}
+[".oh-my-zsh/custom/themes/powerlevel10k"]
+    type = "git-repo"
+    url = "https://github.com/romkatv/powerlevel10k.git"
+    refreshPeriod = "168h"
+{{- end }}

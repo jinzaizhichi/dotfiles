@@ -1,36 +1,46 @@
 # dotfiles
 
-jinzaizhichi 的个人配置，通过 [chezmoi](https://www.chezmoi.io/) 管理，支持 Arch Linux / Ubuntu / WSL2 / macOS 跨平台部署。
+jinzaizhichi 的个人配置，通过 [chezmoi](https://www.chezmoi.io/) 管理，支持 Arch Linux / Debian / Ubuntu / WSL2 / macOS 跨平台部署。
 
 ## 目录结构
 
 ```
 .
-├── .chezmoi.toml.tmpl          # chezmoi 主配置模板（系统自动检测）
-├── .chezmoiexternal.toml       # 外部依赖（暂未启用）
+├── .chezmoi.toml.tmpl          # chezmoi 主配置（首次 init 填写 name/email）
+├── .chezmoidata/               # 静态数据（渲染到所有 .tmpl）
+│   ├── hosts.toml              #   - VPS/主机配置
+│   └── projects.toml           #   - 项目清单（驱动 cd 别名和跳转）
+├── .chezmoiexternal.toml.tmpl  # 声明式外部资源（TPM / zsh 插件）
+├── .chezmoiignore              # 跨平台忽略规则（支持模板语法）
 ├── .chezmoitemplates/          # 公共模板片段
-├── run_once_10-packages.sh.tmpl    # 自动安装系统包（pacman/apt/brew）
-├── run_once_20-oh-my-zsh.sh        # 自动安装 oh-my-zsh
-├── run_once_30-cli-tools.sh        # 自动安装 nvm/bun/rustup/pyenv
-├── run_onchange_40-zsh-plugins.sh.tmpl  # 插件变动时自动重装
+├── .editorconfig               # 缩进/换行统一规则（仓库自身，不部署）
+│
+├── run_once_10-packages.sh.tmpl       # 系统包（Arch/Debian/Ubuntu/macOS）
+├── run_once_20-oh-my-zsh.sh           # oh-my-zsh（KEEP_ZSHRC 模式）
+├── run_once_30-cli-tools.sh           # curl 安装类工具（nvm/bun/rustup/pyenv/atuin/zoxide）
+├── run_once_after_45-tmux-plugins.sh  # 首次触发 TPM install_plugins
+│
 ├── dot_zshrc.tmpl              # Zsh 入口
+├── dot_tmux.conf.tmpl          # tmux 配置
 ├── dot_gitconfig.tmpl          # Git 配置
+│
 ├── dot_config/
-│   ├── mypy/config             # mypy 类型检查配置
+│   ├── mypy/config
 │   └── zsh/                    # Zsh 模块化配置
-│       ├── 00-env.zsh.tmpl     # 环境变量（API Keys 通过 pass 读取）
-│       ├── 10-path.zsh.tmpl    # PATH 配置
-│       ├── 20-aliases.zsh.tmpl # 别名
-│       ├── 30-functions.zsh.tmpl # 自定义函数
-│       ├── 40-tools.zsh.tmpl   # 工具集成（p10k, atuin, fasd, bun 等）
-│       ├── 50-projects.zsh.tmpl # 项目快捷操作
-│       └── readonly_99-local.zsh # 本机本地配置（不提交）
+│       ├── 00-env.zsh.tmpl         # 环境变量（pass 取 API key）
+│       ├── 10-path.zsh.tmpl        # PATH
+│       ├── 20-aliases.zsh.tmpl     # 别名（项目跳转由 .chezmoidata 驱动）
+│       ├── 30-functions.zsh.tmpl   # 自定义函数
+│       ├── 40-tools.zsh.tmpl       # 工具集成 + nvm/pyenv/rbenv lazy load
+│       ├── 50-projects.zsh.tmpl    # 项目/VPS 快捷操作
+│       └── create_99-local.zsh.tmpl # 机器本地配置（首次生成后不再覆盖）
+│
 ├── private_dot_ssh/
-│   ├── config                  # SSH 连接配置
+│   ├── config.tmpl             # SSH 配置（主机来自 .chezmoidata/hosts.toml）
 │   ├── encrypted_private_readonly_id_ed25519.asc     # 私钥（GPG 加密）
 │   └── encrypted_private_readonly_id_ed25519.pub.asc # 公钥（GPG 加密）
 └── private_dot_gnupg/
-    └── gpg-agent.conf          # GPG Agent 配置
+    └── gpg-agent.conf          # GPG Agent 配置（Linux 专属）
 ```
 
 ## 快速开始
@@ -78,7 +88,7 @@ sh -c "$(curl -fsLS get.chezmoi.io)"
 ~/.local/bin/chezmoi init --apply https://github.com/jinzaizhichi/dotfiles.git
 ```
 
-oh-my-zsh、zsh 插件、及常用 CLI 工具（nvm、bun、rustup、atuin 等）均由 chezmoi `run_once_` 脚本自动安装，无需手动操作。
+`run_once_*` 脚本自动装系统包、oh-my-zsh、nvm/bun/rustup/pyenv；`chezmoiexternal` 自动拉取 TPM、zsh-autosuggestions、powerlevel10k（每周刷新）。
 
 ## 日常使用
 
@@ -92,6 +102,9 @@ chezmoi diff
 # 应用变更到家目录
 chezmoi apply
 
+# 强制刷新外部资源（TPM/插件）
+chezmoi apply --refresh-externals
+
 # 拉取远程最新配置并应用
 chezmoi update
 
@@ -102,30 +115,53 @@ git commit -m "chore: ..."
 git push
 ```
 
+## 架构特性
+
+### 数据与模板分离
+
+- **静态数据**：VPS IP/端口、项目路径 → `.chezmoidata/*.toml`
+- **模板引用**：`{{ .hosts.lance.ip }}` / `{{ .projects }}` 等
+- 新增项目只需在 `projects.toml` 加一项，`cd{{alias}}` 别名和跳转函数自动生成
+- VPS 迁移/换 IP 只需改一处
+
+### 声明式外部资源
+
+`.chezmoiexternal.toml.tmpl` 管理 git 仓库类依赖：
+
+- TPM、zsh-autosuggestions 所有平台
+- powerlevel10k 仅在无 pacman/brew 的系统（Arch/macOS 由包管理器装）
+- 自动按 `refreshPeriod = "168h"` 每周检查更新
+
+### Zsh 启动性能
+
+- `nvm/pyenv/rbenv` 采用**惰性加载**，首次调用 `node/python/ruby` 才初始化
+- `kubectl/gh` 补全**缓存到文件**，命令二进制未变动就不重新生成
+- 预估启动耗时：300–500ms → <100ms（视已装工具数）
+
+### 本地/共享配置分离
+
+- 共享配置在 `00-env` 到 `50-projects`，所有机器一致
+- 机器专属：`create_99-local.zsh.tmpl`
+  - `create_` 前缀语义：文件不存在才生成模板，已存在不覆盖
+  - 适合存放 API Key 引用、机器特定 SSH 隧道、临时测试变量
+
 ## Claude Code 模型供应商切换
 
-`~/.config/zsh/99-local.zsh` 内置 `switch-model` 函数，支持在多个 AI 供应商间一键切换（重启 Claude Code 生效）：
+`~/.config/zsh/99-local.zsh` 内置 `switch-model` 函数（从 `~/claude-config/scripts/switch-model.sh` 加载）：
 
 ```bash
-# 默认启动使用 DeepSeek
-switch-model deepseek    # → api.deepseek.com/anthropic (deepseek-v4-pro / v4-flash)
-switch-model anthropic   # → api.apikey.fun (claude-opus-4-7)
-
-# 查看当前供应商
+switch-model deepseek    # → api.deepseek.com/anthropic
+switch-model anthropic   # → api.apikey.fun
 echo $ANTHROPIC_BASE_URL
 ```
 
-供应商配置：
-
-| 供应商 | API 地址 | Opus/Sonnet | Haiku | Key 来源 |
-|--------|---------|-------------|-------|----------|
-| deepseek | api.deepseek.com/anthropic | deepseek-v4-pro | deepseek-v4-flash | `pass deepseek/api-key` |
-| anthropic | api.apikey.fun | claude-opus-4-7 | claude-opus-4-7 | `pass apikey-fun/api-key` |
-
-新增供应商只需在 `99-local.zsh` 的 `_claude_model_setup` 函数中添加一个 case 分支。
+| 供应商 | API 地址 | Key 来源 |
+|--------|---------|----------|
+| deepseek | api.deepseek.com/anthropic | `pass deepseek/api-key` |
+| anthropic | api.apikey.fun | `pass apikey-fun/api-key` |
 
 ## 安全说明
 
-- API Keys 通过 [pass](https://www.passwordstore.org/) 读取，不硬编码在配置中
-- SSH 私钥通过 GPG 加密后存储（`.asc` 文件）
-- 本机专属配置写入 `~/.config/zsh/99-local.zsh`，不纳入版本控制
+- API Keys 通过 [pass](https://www.passwordstore.org/) 读取，**不硬编码**
+- SSH 私钥通过 GPG 加密后存入 Git（`.asc` 文件）
+- 机器专属的 `99-local.zsh` 首次生成后不再被覆盖

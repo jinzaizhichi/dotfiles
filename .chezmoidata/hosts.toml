@@ -1,0 +1,19 @@
+# chezmoi 静态数据：主机与网络
+#
+# 模板中用 {{ .hosts.lance.ip }} 等形式引用。
+# 修改此文件后 chezmoi apply 会重新渲染所有引用该变量的模板。
+
+[hosts.lance]
+alias = "Lance"
+ip = "91.230.73.42"
+user = "jinzaizhichi"
+admin_user = "root"
+ssh_port = 2222
+# Futu OpenD 运行在 VPS 上（非默认 11111）
+futu_opend_port = 11112
+
+[hosts.aliyun]
+alias = "Aliyun"
+ip = "121.43.32.237"
+user = "root"
+ssh_port = 22

@@ -101,31 +101,48 @@ source "$HOME/.openclaw/completions/openclaw.zsh"
 {{- end }}
 
 # ============================================
-# nvm - Node Version Manager
+# 版本管理器 lazy load
+#
+# 为什么：nvm/pyenv/rbenv 的完整初始化是 zsh 启动慢的主要来源，
+# 用占位函数拦截首次调用才实际初始化，平均可省 300-500ms。
+# 代价：首次运行命令会多几十毫秒（一次性）。
 # ============================================
 
 {{- if stat (joinPath .chezmoi.homeDir ".config/nvm/nvm.sh") }}
 export NVM_DIR="$HOME/.config/nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+_lazy_load_nvm() {
+    unset -f nvm node npm npx pnpm yarn
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+}
+for _cmd in nvm node npm npx pnpm yarn; do
+    eval "${_cmd}() { _lazy_load_nvm; ${_cmd} \"\$@\"; }"
+done
+unset _cmd
 {{- end }}
-
-# ============================================
-# pyenv - Python Version Manager
-# ============================================
 
 {{- if lookPath "pyenv" }}
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+_lazy_load_pyenv() {
+    unset -f pyenv python python3 pip pip3
+    eval "$(command pyenv init -)"
+}
+for _cmd in pyenv python python3 pip pip3; do
+    eval "${_cmd}() { _lazy_load_pyenv; ${_cmd} \"\$@\"; }"
+done
+unset _cmd
 {{- end }}
 
-# ============================================
-# rbenv - Ruby Version Manager
-# ============================================
-
 {{- if lookPath "rbenv" }}
-eval "$(rbenv init - zsh)"
+_lazy_load_rbenv() {
+    unset -f rbenv ruby gem bundle rails
+    eval "$(command rbenv init - zsh)"
+}
+for _cmd in rbenv ruby gem bundle rails; do
+    eval "${_cmd}() { _lazy_load_rbenv; ${_cmd} \"\$@\"; }"
+done
+unset _cmd
 {{- end }}
 
 # ============================================
@@ -142,8 +159,13 @@ alias docker-compose='docker compose'
 # ============================================
 
 {{- if lookPath "kubectl" }}
-# kubectl 补全
-source <(kubectl completion zsh)
+# kubectl 补全（缓存到文件，避免每次启动都 fork kubectl）
+_kubectl_completion_cache="$HOME/.cache/zsh/kubectl_completion.zsh"
+if [[ ! -f "$_kubectl_completion_cache" || "$commands[kubectl]" -nt "$_kubectl_completion_cache" ]]; then
+    mkdir -p "${_kubectl_completion_cache:h}"
+    kubectl completion zsh >| "$_kubectl_completion_cache"
+fi
+source "$_kubectl_completion_cache"
 alias k='kubectl'
 complete -F __start_kubectl k
 {{- end }}

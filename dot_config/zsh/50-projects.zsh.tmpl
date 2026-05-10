@@ -7,7 +7,7 @@
 # 项目路径
 # ============================================
 
-export PROJECTS_DIR="$HOME/projects"
+export PROJECTS_DIR="{{ .projects_root }}"
 
 # ============================================
 # 项目启动函数
@@ -203,7 +203,7 @@ check-positions() {
 
 # SSH 到 VPS
 ssh-vps() {
-    ssh root@91.230.73.42
+    ssh {{ .hosts.lance.admin_user }}@{{ .hosts.lance.ip }}
 }
 
 # 同步项目到 VPS
@@ -230,7 +230,7 @@ sync-to-vps() {
         --exclude '__pycache__' \
         --exclude '.git' \
         "$local_path/" \
-        "root@91.230.73.42:$remote_path/"
+        "{{ .hosts.lance.admin_user }}@{{ .hosts.lance.ip }}:$remote_path/"
     
     echo "✅ 同步完成"
 }
@@ -256,12 +256,12 @@ coolify-deploy() {
 
 # 查看 Nginx 访问日志
 nginx-access() {
-    ssh root@91.230.73.42 "tail -f /var/log/nginx/access.log"
+    ssh {{ .hosts.lance.admin_user }}@{{ .hosts.lance.ip }} "tail -f /var/log/nginx/access.log"
 }
 
 # 查看 Nginx 错误日志
 nginx-error() {
-    ssh root@91.230.73.42 "tail -f /var/log/nginx/error.log"
+    ssh {{ .hosts.lance.admin_user }}@{{ .hosts.lance.ip }} "tail -f /var/log/nginx/error.log"
 }
 
 # ============================================

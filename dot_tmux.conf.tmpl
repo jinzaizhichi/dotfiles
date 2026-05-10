@@ -80,8 +80,5 @@ set -g @catppuccin_date_time_text "%b %d %H:%M"
 # --- 持久化 ---
 set -g @continuum-restore 'on'
 
-# --- 自动安装 TPM 逻辑 ---
-if "test ! -d ~/.tmux/plugins/tpm" \
-   "run 'git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && ~/.tmux/plugins/tpm/bin/install_plugins'"
-
+# TPM 由 chezmoi externals 安装（见 .chezmoiexternal.toml.tmpl）
 run '~/.tmux/plugins/tpm/tpm'
