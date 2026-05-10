@@ -62,10 +62,10 @@ _chezmoi_pass_keys() {
     "vibe-trading/api_key:VIBE_TRADING_API_KEY"
     "vibe-trading/model:VIBE_TRADING_MODEL"
   )
+  local pass_path env_var val
   for entry in "${key_map[@]}"; do
-    local pass_path="${entry%%:*}"
-    local env_var="${entry##*:}"
-    local val
+    pass_path="${entry%%:*}"
+    env_var="${entry##*:}"
     val="$(pass show "$pass_path" 2>/dev/null)" && export "$env_var"="$val"
   done
 }
