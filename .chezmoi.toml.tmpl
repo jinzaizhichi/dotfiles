@@ -1,4 +1,6 @@
 encryption = "gpg"
+progress = true
+scriptTempDir = "{{ .chezmoi.homeDir }}/.cache/chezmoi-tmp"
 
 [data]
     email = "jinzaizhichi9888@gmail.com"
@@ -10,8 +12,6 @@ encryption = "gpg"
     isUbuntu = {{ eq .chezmoi.osRelease.id "ubuntu" }}
     isDebian = {{ eq .chezmoi.osRelease.id "debian" }}
     isMac = {{ eq .chezmoi.os "darwin" }}
-    username = "{{ .chezmoi.username }}"
-    homeDir = "{{ .chezmoi.homeDir }}"
 
 [gpg]
     recipient = "jinzaizhichi9888@gmail.com"
@@ -22,3 +22,10 @@ encryption = "gpg"
 [diff]
     command = "nvim"
     args = ["-d"]
+
+[merge]
+    command = "nvim"
+    args = ["-d"]
+
+[status]
+    pathStyle = "relative"
