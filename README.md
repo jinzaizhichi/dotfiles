@@ -70,7 +70,7 @@ gpg --import your-private-key.asc
 
 **第三步：同步 pass 密码库**
 
-`dot_gitconfig.tmpl` 在渲染时会调用 `pass show github/api/token`，密码库必须提前就绪：
+`dot_gitconfig.tmpl` 在渲染时会调用 `pass show github/full-access/api-key`，密码库必须提前就绪：
 
 ```bash
 # 如果 pass 密码库用 git 管理，克隆到本地
@@ -78,7 +78,7 @@ git clone <your-pass-repo> ~/.password-store
 
 # 或者初始化并手动插入必要的 key
 pass init jinzaizhichi9888@gmail.com
-pass insert github/api/token
+pass insert github/full-access/api-key
 ```
 
 **第四步：安装 chezmoi 并初始化**

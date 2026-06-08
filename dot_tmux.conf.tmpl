@@ -3,65 +3,75 @@ set-option -sa terminal-overrides ",xterm*:Tc"
 set -g mouse on
 set -g base-index 1
 set -g pane-base-index 1
-set-option -g renumber-windows on
+set -g renumber-windows on
 set -s escape-time 0
-set -g status-interval 1
-# 确保 tmux 支持 utf-8
+set -g status-interval 15
+set -g history-limit 50000
+
+# UTF-8 + 256 色
 set -q -g status-utf8 on
 setw -q -g utf8 on
-
-# 强制 TERM 变量以支持 256 色和图标渲染
 set -g default-terminal "tmux-256color"
 
-## --- 快捷键 ---
-# 解绑所有可能冲突的前缀
+# --- 快捷键 ---
 unbind C-Space
 unbind C-b
 
-# 设置前缀为 Ctrl + b
 set -g prefix C-b
 bind C-b send-prefix
-# 快速重载配置 (Prefix + r)
+
+# 快速重载 (Prefix + r)
 bind r source-file ~/.tmux.conf \; display "Config Reloaded!"
 
 # 拆分窗格保持路径
 bind '"' split-window -v -c "#{pane_current_path}"
 bind % split-window -h -c "#{pane_current_path}"
+bind '|' split-window -h -c "#{pane_current_path}"
+bind '-' split-window -v -c "#{pane_current_path}"
 
 # 切换窗口 (Alt+Shift+H/L)
 bind -n M-H previous-window
 bind -n M-L next-window
 
-# --- Vi 模式 ---
-set-window-option -g mode-keys vi
+# Pane 大小调整 (Prefix + H/J/K/L, 可连续按)
+bind -r H resize-pane -L 5
+bind -r J resize-pane -D 5
+bind -r K resize-pane -U 5
+bind -r L resize-pane -R 5
+
+# 快速切回上一个窗口 (Prefix + Tab)
+bind Tab last-window
+
+# --- Vi 模式 + 剪贴板 ---
+set -g mode-keys vi
 set -g set-clipboard on
 
-# 复制时强制用 xclip 写入系统剪贴板（处理 UTF-8）
 bind -T copy-mode-vi v send-keys -X begin-selection
 bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
-bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"
 
-# --- 天气 Custom Module（必须在 catppuccin 插件加载前定义）---
-# wttr.in 每 30 分钟刷新一次，format=3 输出单行紧凑格式，如：Fushan: ⛅ +18°C
+# 剪贴板：WSL2 用 clip.exe，Linux 用 xclip
+if-shell 'grep -qi microsoft /proc/version 2>/dev/null' \
+  'bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "clip.exe"' \
+  'bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"'
+
+# --- 天气 Custom Module（30 分钟文件缓存，不再每秒请求 wttr.in）---
 %hidden MODULE_NAME="weather"
 set -g "@catppuccin_${MODULE_NAME}_icon" "󰖐 "
 set -gF "@catppuccin_${MODULE_NAME}_color" "#{E:@thm_teal}"
-set -g "@catppuccin_${MODULE_NAME}_text" "#(curl -s 'wttr.in/Fushan,Shanxi?format=3&m&lang=zh' 2>/dev/null)"
-source "~/.tmux/plugins/catppuccin/tmux/utils/status_module.conf"
+set -g "@catppuccin_${MODULE_NAME}_text" "#(C=/tmp/tmux-weather; if [ ! -f \"\$C\" ] || [ -n \"\$(find \"\$C\" -mmin +30 2>/dev/null)\" ]; then curl -fsS -m 5 'wttr.in/Fushan,Shanxi?format=3&m&lang=zh' -o \"\$C\" 2>/dev/null || echo '?' > \"\$C\"; fi; cat \"\$C\" 2>/dev/null)"
+source "~/.tmux/plugins/tmux/utils/status_module.conf"
 
 # --- 插件列表 ---
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'christoomey/vim-tmux-navigator'
 set -g @plugin 'catppuccin/tmux#v2.3.0'
-set -g @plugin 'tmux-plugins/tmux-yank'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 
-# --- Catppuccin 主题配置（新版语法）---
+# --- Catppuccin 主题配置 ---
 set -g @catppuccin_flavor 'mocha'
 set -g @catppuccin_window_status_style "rounded"
-# 窗口只显示名称，不显示路径
 set -g @catppuccin_window_default_text "#W"
 set -g @catppuccin_window_current_text "#W"
 
@@ -69,16 +79,15 @@ set -g @catppuccin_window_current_text "#W"
 set -g status-right-length 150
 set -g status-left-length 100
 
-# 左侧：session 名
 set -g status-left "#{E:@catppuccin_status_session}"
 
-# 右侧：天气 + 时间
 set -g status-right "#{E:@catppuccin_status_weather}"
 set -ag status-right "#{E:@catppuccin_status_date_time}"
 set -g @catppuccin_date_time_text "%b %d %H:%M"
 
 # --- 持久化 ---
 set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
 
 # TPM 由 chezmoi externals 安装（见 .chezmoiexternal.toml.tmpl）
 run '~/.tmux/plugins/tpm/tpm'

@@ -6,7 +6,7 @@
 	gpgsign = true
 [github]
 	signingkey = {{ .email}}
-	token = {{ pass "github/api/token" }}
+	token = {{ pass "github/full-access/api-key" }}
 [core]
 	pager = delta
 [delta]
