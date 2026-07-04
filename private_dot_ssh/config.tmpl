@@ -1,5 +1,28 @@
 # SSH 配置（由 chezmoi 渲染，主机数据见 .chezmoidata/hosts.toml）
 
+Host {{ index .hosts "us-vps" "alias" }} NewVPS
+    HostName {{ index .hosts "us-vps" "ip" }}
+    User {{ index .hosts "us-vps" "user" }}
+    Port {{ index .hosts "us-vps" "ssh_port" }}
+
+Host {{ index .hosts "hk-vps" "alias" }}
+    HostName {{ index .hosts "hk-vps" "ip" }}
+    User {{ index .hosts "hk-vps" "user" }}
+    Port {{ index .hosts "hk-vps" "ssh_port" }}
+
+# 跳板：通过对方 VPS 中转（当前 IP 被 fail2ban 封禁时使用）
+Host US-VPS-via-HK
+    HostName {{ index .hosts "us-vps" "ip" }}
+    User {{ index .hosts "us-vps" "user" }}
+    Port {{ index .hosts "us-vps" "ssh_port" }}
+    ProxyJump {{ index .hosts "hk-vps" "alias" }}
+
+Host HK-VPS-via-US
+    HostName {{ index .hosts "hk-vps" "ip" }}
+    User {{ index .hosts "hk-vps" "user" }}
+    Port {{ index .hosts "hk-vps" "ssh_port" }}
+    ProxyJump {{ index .hosts "us-vps" "alias" }}
+
 Host {{ .hosts.aliyun.alias }}
     HostName {{ .hosts.aliyun.ip }}
     User {{ .hosts.aliyun.user }}

@@ -12,6 +12,18 @@ ssh_port = 2222
 # Futu OpenD 运行在 VPS 上（非默认 11111）
 futu_opend_port = 11112
 
+[hosts."us-vps"]
+alias = "US-VPS"
+ip = "173.254.232.246"
+user = "jinzaizhichi"
+ssh_port = 2222
+
+[hosts."hk-vps"]
+alias = "HK-VPS"
+ip = "207.57.129.200"
+user = "jinzaizhichi"
+ssh_port = 2222
+
 [hosts.aliyun]
 alias = "Aliyun"
 ip = "121.43.32.237"
