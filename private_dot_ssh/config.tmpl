@@ -39,3 +39,14 @@ Host github.com
     Hostname ssh.github.com
     Port 443
     User git
+
+# === 全局默认（ControlMaster 多路复用防止并发连接触发 VPS SSH 速率限制） ===
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/controlmasters/%C
+    ControlPersist 10m
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    ConnectTimeout 10
+    # 防止被 VPS fail2ban/CrowdSec 误封后完全断连：
+    # 使用 ssh -o ControlMaster=no 可跳过复用，建立独立连接排查
