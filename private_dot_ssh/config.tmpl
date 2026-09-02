@@ -42,6 +42,8 @@ Host github.com
 
 # === 全局默认（ControlMaster 多路复用防止并发连接触发 VPS SSH 速率限制） ===
 Host *
+    AddKeysToAgent yes
+    IdentityFile ~/.ssh/id_ed25519
     ControlMaster auto
     ControlPath ~/.ssh/controlmasters/%C
     ControlPersist 10m
