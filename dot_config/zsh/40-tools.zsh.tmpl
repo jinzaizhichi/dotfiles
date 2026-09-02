@@ -20,6 +20,8 @@ bindkey '^j' autosuggest-accept      # Ctrl+J 接受建议
 bindkey '^k' autosuggest-execute     # Ctrl+K 执行建议
 bindkey -s '\e\e' '\C-asudo \C-e'    # ESC ESC 添加 sudo
 bindkey '^x' kill-line               # Ctrl+X 删除到行尾
+# 依次从：历史记录 -> 补全引擎 -> 历史目录 中寻找建议
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # ============================================
 # fasd - 快速跳转
