@@ -54,22 +54,22 @@ ZSH_CONFIG_DIR="$HOME/.config/zsh"
 if [ -d "$ZSH_CONFIG_DIR" ]; then
     # 00-env.zsh: 环境变量
     [ -f "$ZSH_CONFIG_DIR/00-env.zsh" ] && source "$ZSH_CONFIG_DIR/00-env.zsh"
-    
+
     # 10-path.zsh: PATH 配置
     [ -f "$ZSH_CONFIG_DIR/10-path.zsh" ] && source "$ZSH_CONFIG_DIR/10-path.zsh"
-    
+
     # 20-aliases.zsh: 别名
     [ -f "$ZSH_CONFIG_DIR/20-aliases.zsh" ] && source "$ZSH_CONFIG_DIR/20-aliases.zsh"
-    
+
     # 30-functions.zsh: 自定义函数
     [ -f "$ZSH_CONFIG_DIR/30-functions.zsh" ] && source "$ZSH_CONFIG_DIR/30-functions.zsh"
-    
+
     # 40-tools.zsh: 工具集成（fasd, atuin, p10k等）
     [ -f "$ZSH_CONFIG_DIR/40-tools.zsh" ] && source "$ZSH_CONFIG_DIR/40-tools.zsh"
-    
+
     # 50-projects.zsh: 项目特定配置
     [ -f "$ZSH_CONFIG_DIR/50-projects.zsh" ] && source "$ZSH_CONFIG_DIR/50-projects.zsh"
-    
+
     # 99-local.zsh: 本地配置（不提交到 Git）
     [ -f "$ZSH_CONFIG_DIR/99-local.zsh" ] && source "$ZSH_CONFIG_DIR/99-local.zsh"
 fi
@@ -111,7 +111,4 @@ weather_panel() {
 }
 weather_panel
 
-# Antigravity CLI (agy) - 禁用后台自动升级与探活
-export AGY_NO_UPDATE=1
-export AGY_DISABLE_AUTO_UPDATE=1
-export ANTIGRAVITY_DISABLE_AUTO_UPDATE=1
+eval $(keychain --eval --quiet id_ed25519)
