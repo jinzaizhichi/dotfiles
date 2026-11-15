@@ -16,16 +16,13 @@ scriptTempDir = "{{ .chezmoi.homeDir }}/.cache/chezmoi-tmp"
 [gpg]
     recipient = "jinzaizhichi9888@gmail.com"
 
+{{- if lookPath "nvim" }}
 [edit]
     command = "nvim"
-
-[diff]
-    command = "nvim"
-    args = ["-d"]
 
 [merge]
     command = "nvim"
     args = ["-d"]
-
+{{- end }}
 [status]
     pathStyle = "relative"
