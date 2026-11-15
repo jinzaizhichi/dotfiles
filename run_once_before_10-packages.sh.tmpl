@@ -1,6 +1,6 @@
 #!/bin/bash
 # 系统包安装脚本
-# 为什么用 run_once_：包管理器安装只需做一次，后续用 update 命令维护
+# 为什么用 run_once_before_：在渲染配置文件前优先装好基础依赖，后续用 update 命令维护
 set -euo pipefail
 
 echo "==> [10-packages] 安装系统包..."
@@ -14,12 +14,18 @@ echo "==> [10-packages] 安装系统包..."
 if ! command -v brew &>/dev/null; then
     echo "安装 Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # 确保当前脚本会话能立刻找到 brew（适配 Apple Silicon / Intel）
+    if [ -x /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -x /usr/local/bin/brew ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
 fi
 
-# 安装核心工具
+# 安装核心工具（[新增] 补充 tmux、unzip）
 brew install \
-    git curl wget \
-    zsh neovim \
+    git curl wget unzip \
+    zsh tmux neovim \
     fzf zoxide direnv \
     atuin fasd \
     ripgrep fd bat eza \
@@ -33,25 +39,30 @@ brew install \
 # Arch Linux - pacman + yay
 # ============================================================
 
-# 确保 yay 已安装（AUR helper）
-if ! command -v yay &>/dev/null; then
-    echo "安装 yay..."
-    sudo pacman -S --noconfirm --needed git base-devel
-    rm -rf /tmp/yay
-    git clone https://aur.archlinux.org/yay.git /tmp/yay
-    (cd /tmp/yay && makepkg -si --noconfirm)
-    rm -rf /tmp/yay
+# [新增] 防呆：禁止以 root 身份运行（makepkg 编译 yay 会拒绝执行）
+if [ "$EUID" -eq 0 ]; then
+    echo "ERROR: 请勿直接以 root 用户运行，请使用带有 sudo 权限的普通用户执行！" >&2
+    exit 1
 fi
 
-# pacman 官方源
-sudo pacman -S --noconfirm --needed \
-    git curl wget \
-    zsh neovim \
+# [修改] 先执行完整系统升级并安装基础依赖，避免部分升级（Partial Upgrade）冲突
+sudo pacman -Syu --noconfirm --needed \
+    git curl wget unzip zip tar base-devel \
+    zsh tmux neovim \
     fzf direnv \
     ripgrep fd bat eza \
     htop jq \
     pass gnupg \
     github-cli
+
+# 确保 yay 已安装（AUR helper）
+if ! command -v yay &>/dev/null; then
+    echo "安装 yay..."
+    rm -rf /tmp/yay
+    git clone https://aur.archlinux.org/yay.git /tmp/yay
+    (cd /tmp/yay && makepkg -si --noconfirm)
+    rm -rf /tmp/yay
+fi
 
 # AUR 包
 yay -S --noconfirm --needed \
@@ -66,16 +77,16 @@ yay -S --noconfirm --needed \
 
 sudo apt-get update -qq
 
-# 核心工具（apt 直接安装）
+# 核心工具（apt 直接安装，[新增] 补充 tmux）
 sudo apt-get install -y \
     git curl wget \
-    zsh \
+    zsh tmux \
     fzf direnv \
     ripgrep fd-find bat \
     htop jq \
     pass gnupg \
     make build-essential \
-    unzip \
+    unzip zip \
     software-properties-common apt-transport-https ca-certificates
 
 # fd 在 Ubuntu 里叫 fd-find，建立软链
@@ -154,17 +165,16 @@ fi
 
 sudo apt-get update -qq
 
-# 核心工具（apt 直接安装）
-# Debian 13 官方源有较新版本，大部分不需要额外 repo
+# 核心工具（apt 直接安装，[新增] 补充 tmux）
 sudo apt-get install -y \
     git curl wget \
-    zsh neovim \
+    zsh tmux neovim \
     fzf direnv \
     ripgrep fd-find bat \
     htop jq \
     pass gnupg \
     make build-essential \
-    unzip \
+    unzip zip \
     apt-transport-https ca-certificates
 
 # fd → fd-find 软链
