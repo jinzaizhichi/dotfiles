@@ -47,7 +47,7 @@ fi
 # 先执行完整系统升级并安装基础依赖，避免部分升级（Partial Upgrade）冲突
 sudo pacman -Syu --noconfirm --needed \
     git curl wget unzip zip tar base-devel openssh \
-    zsh tmux neovim zsh-theme-powerlevel10k \
+    zsh tmux neovim \
     fzf direnv \
     ripgrep fd bat eza \
     htop jq \
@@ -68,6 +68,12 @@ yay -S --noconfirm --needed \
     zoxide \
     atuin \
     fasd
+
+# Powerlevel10k 主题（直接克隆，免去 AUR 编译耗时）
+if [ ! -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ] && [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
+    echo "安装 Powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+fi
 
 {{ else if .isUbuntu -}}
 # ============================================================
