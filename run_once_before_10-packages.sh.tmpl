@@ -22,7 +22,7 @@ if ! command -v brew &>/dev/null; then
     fi
 fi
 
-# 安装核心工具（[新增] 补充 tmux、unzip）
+# 安装核心工具
 brew install \
     git curl wget unzip \
     zsh tmux neovim \
@@ -39,15 +39,15 @@ brew install \
 # Arch Linux - pacman + yay
 # ============================================================
 
-# [新增] 防呆：禁止以 root 身份运行（makepkg 编译 yay 会拒绝执行）
+# 防呆：禁止以 root 身份运行（makepkg 编译 yay 会拒绝执行）
 if [ "$EUID" -eq 0 ]; then
     echo "ERROR: 请勿直接以 root 用户运行，请使用带有 sudo 权限的普通用户执行！" >&2
     exit 1
 fi
 
-# [修改] 先执行完整系统升级并安装基础依赖，避免部分升级（Partial Upgrade）冲突
+# 先执行完整系统升级并安装基础依赖，避免部分升级（Partial Upgrade）冲突
 sudo pacman -Syu --noconfirm --needed \
-    git curl wget unzip zip tar base-devel \
+    git curl wget unzip zip tar base-devel openssh \
     zsh tmux neovim \
     fzf direnv \
     ripgrep fd bat eza \
@@ -77,9 +77,9 @@ yay -S --noconfirm --needed \
 
 sudo apt-get update -qq
 
-# 核心工具（apt 直接安装，[新增] 补充 tmux）
+# 核心工具（apt 直接安装）
 sudo apt-get install -y \
-    git curl wget \
+    git curl wget openssh-client locales \
     zsh tmux \
     fzf direnv \
     ripgrep fd-find bat \
@@ -165,9 +165,9 @@ fi
 
 sudo apt-get update -qq
 
-# 核心工具（apt 直接安装，[新增] 补充 tmux）
+# 核心工具（apt 直接安装）
 sudo apt-get install -y \
-    git curl wget \
+    git curl wget openssh-client locales \
     zsh tmux neovim \
     fzf direnv \
     ripgrep fd-find bat \
@@ -241,6 +241,15 @@ fi
 {{ else -}}
 echo "ERROR: 不支持的操作系统，请手动安装依赖包" >&2
 exit 1
+{{ end -}}
+
+{{ if not .isMac -}}
+# 确保 en_US.UTF-8 locale 已生成（解决精简容器或云主机 LC_ALL 警告）
+if [ -f /etc/locale.gen ] && ! locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
+    echo "生成 en_US.UTF-8 locale..."
+    sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+    sudo locale-gen
+fi
 {{ end -}}
 
 echo "==> [10-packages] 完成 ✓"
