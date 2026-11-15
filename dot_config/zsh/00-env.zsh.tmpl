@@ -8,6 +8,9 @@
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# 终端色彩支持（防止精简容器或 SSH 默认 TERM=xterm 导致 p10k 退化为单色）
+[[ "$TERM" == "xterm" || -z "$TERM" ]] && export TERM="xterm-256color"
+
 # 编辑器（统一使用 nvim）
 export EDITOR=nvim
 export VISUAL=nvim
