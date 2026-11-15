@@ -116,4 +116,7 @@ weather_panel() {
 }
 weather_panel
 
-eval $(keychain --eval --quiet id_ed25519)
+if command -v keychain &>/dev/null && [[ -f "$HOME/.ssh/id_ed25519" ]]; then
+    eval "$(keychain --eval --quiet id_ed25519)"
+fi
+
