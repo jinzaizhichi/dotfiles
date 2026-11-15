@@ -6,10 +6,15 @@
 
 set -euo pipefail
 
+if ! command -v tmux &>/dev/null; then
+    echo "==> [45-tmux-plugins] 跳过：系统未安装 tmux"
+    exit 0
+fi
+
 TPM_BIN="$HOME/.tmux/plugins/tpm/bin/install_plugins"
 
-if [[ ! -x "$TPM_BIN" ]]; then
-    echo "==> [45-tmux-plugins] 跳过：TPM 未安装（externals 未执行？）"
+if [[ ! -x "$TPM_BIN" ]] || [[ ! -f "$HOME/.tmux.conf" ]]; then
+    echo "==> [45-tmux-plugins] 跳过：TPM 或 ~/.tmux.conf 未就绪"
     exit 0
 fi
 

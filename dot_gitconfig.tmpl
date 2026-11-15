@@ -4,9 +4,11 @@
 	signingkey = {{ .email}}
 [commit]
 	gpgsign = true
+{{- if and (lookPath "pass") (stat (joinPath .chezmoi.homeDir ".password-store")) }}
 [github]
 	signingkey = {{ .email}}
 	token = {{ pass "github/full-access/api-key" }}
+{{- end }}
 [core]
 	pager = delta
 [delta]
