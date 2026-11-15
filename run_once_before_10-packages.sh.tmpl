@@ -14,7 +14,6 @@ echo "==> [10-packages] 安装系统包..."
 if ! command -v brew &>/dev/null; then
     echo "安装 Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # 确保当前脚本会话能立刻找到 brew（适配 Apple Silicon / Intel）
     if [ -x /opt/homebrew/bin/brew ]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
     elif [ -x /usr/local/bin/brew ]; then
@@ -25,7 +24,7 @@ fi
 # 安装核心工具
 brew install \
     git curl wget unzip \
-    zsh tmux neovim \
+    zsh tmux neovim powerlevel10k \
     fzf zoxide direnv \
     atuin fasd \
     ripgrep fd bat eza \
@@ -48,7 +47,7 @@ fi
 # 先执行完整系统升级并安装基础依赖，避免部分升级（Partial Upgrade）冲突
 sudo pacman -Syu --noconfirm --needed \
     git curl wget unzip zip tar base-devel openssh \
-    zsh tmux neovim \
+    zsh tmux neovim zsh-theme-powerlevel10k \
     fzf direnv \
     ripgrep fd bat eza \
     htop jq \
@@ -158,6 +157,12 @@ if ! command -v fasd &>/dev/null; then
     rm -rf /tmp/fasd
 fi
 
+# Powerlevel10k 主题克隆兜底
+if [ ! -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ] && [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
+    echo "安装 Powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+fi
+
 {{ else if .isDebian -}}
 # ============================================================
 # Debian - apt + 手动安装（无 PPA，直接用官方源）
@@ -236,6 +241,12 @@ if ! command -v fasd &>/dev/null; then
     git clone https://github.com/clvv/fasd.git /tmp/fasd
     sudo make -C /tmp/fasd install
     rm -rf /tmp/fasd
+fi
+
+# Powerlevel10k 主题克隆兜底
+if [ ! -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ] && [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
+    echo "安装 Powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 fi
 
 {{ else -}}

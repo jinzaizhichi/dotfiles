@@ -254,9 +254,15 @@ FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
 # ============================================
 
 {{- if .isArch }}
-# Arch Linux - 从系统包加载
+# Powerlevel10k 主题多平台加载（Arch / macOS / OMZ 兜底）
 if [ -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ]; then
     source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+elif [ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]; then
+    source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+elif [ -f /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme ]; then
+    source /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme
+elif [ -f "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme" ]; then
+    source "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme"
 fi
 {{- else if .isMac }}
 # macOS - 从 Homebrew 加载
