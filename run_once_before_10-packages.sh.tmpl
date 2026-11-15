@@ -3,6 +3,16 @@
 # 为什么用 run_once_before_：在渲染配置文件前优先装好基础依赖，后续用 update 命令维护
 set -euo pipefail
 
+# 提前配置 gpg-agent 长缓存并重载，避免安装耗时导致后续解密二次弹窗
+mkdir -p "$HOME/.gnupg" && chmod 700 "$HOME/.gnupg"
+cat << 'EOF' > "$HOME/.gnupg/gpg-agent.conf"
+max-cache-ttl 60480000
+default-cache-ttl 60480000
+max-cache-ttl-ssh 60480000
+default-cache-ttl-ssh 60480000
+EOF
+gpgconf --kill gpg-agent 2>/dev/null || true
+
 echo "==> [10-packages] 安装系统包..."
 
 {{ if .isMac -}}
