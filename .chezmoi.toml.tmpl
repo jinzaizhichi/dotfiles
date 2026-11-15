@@ -7,10 +7,10 @@ scriptTempDir = "{{ .chezmoi.homeDir }}/.cache/chezmoi-tmp"
     name = "jinzaizhichi"
     gpgKey = "jinzaizhichi9888@gmail.com"
     isLinux = {{ eq .chezmoi.os "linux" }}
-    isWSL = {{ contains "microsoft" .chezmoi.kernel.osrelease }}
-    isArch = {{ eq .chezmoi.osRelease.id "arch" }}
-    isUbuntu = {{ eq .chezmoi.osRelease.id "ubuntu" }}
-    isDebian = {{ eq .chezmoi.osRelease.id "debian" }}
+    isWSL = {{ contains "microsoft" (lower (dig "osrelease" "" .chezmoi.kernel)) }}
+    isArch = {{ eq (dig "id" "" .chezmoi.osRelease) "arch" }}
+    isUbuntu = {{ eq (dig "id" "" .chezmoi.osRelease) "ubuntu" }}
+    isDebian = {{ eq (dig "id" "" .chezmoi.osRelease) "debian" }}
     isMac = {{ eq .chezmoi.os "darwin" }}
 
 [gpg]
