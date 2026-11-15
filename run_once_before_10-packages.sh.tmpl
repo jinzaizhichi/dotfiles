@@ -1,282 +1,143 @@
 #!/bin/bash
-# 系统包安装脚本
-# 为什么用 run_once_before_：在渲染配置文件前优先装好基础依赖，后续用 update 命令维护
 set -euo pipefail
 
 # 提前配置 gpg-agent 长缓存并重载，避免安装耗时导致后续解密二次弹窗
 mkdir -p "$HOME/.gnupg" && chmod 700 "$HOME/.gnupg"
-cat << 'EOF' > "$HOME/.gnupg/gpg-agent.conf"
+cat << 'GPGEOF' > "$HOME/.gnupg/gpg-agent.conf"
 max-cache-ttl 60480000
 default-cache-ttl 60480000
 max-cache-ttl-ssh 60480000
 default-cache-ttl-ssh 60480000
-EOF
+GPGEOF
 gpgconf --kill gpg-agent 2>/dev/null || true
 
 echo "==> [10-packages] 安装系统包..."
 
 {{ if .isMac -}}
-# ============================================================
-# macOS - Homebrew
-# ============================================================
-
-# 安装 Homebrew（如果不存在）
 if ! command -v brew &>/dev/null; then
-    echo "安装 Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    if [ -x /opt/homebrew/bin/brew ]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -x /usr/local/bin/brew ]; then
-        eval "$(/usr/local/bin/brew shellenv)"
-    fi
+    [ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
+    [ -x /usr/local/bin/brew ] && eval "$(/usr/local/bin/brew shellenv)"
 fi
-
-# 安装核心工具与语言运行时（支撑 Mason LSP/Formatter）
 brew install \
-    git curl wget unzip \
-    zsh tmux neovim powerlevel10k \
-    node go python pyenv \
-    fzf zoxide direnv \
-    atuin fasd \
-    ripgrep fd bat eza \
-    htop jq \
-    pass gnupg \
-    gh
+    git curl wget unzip zsh tmux neovim powerlevel10k \
+    node go python pyenv fzf zoxide direnv atuin fasd \
+    ripgrep fd bat eza htop jq pass gnupg gh
 
 {{ else if .isArch -}}
-# ============================================================
-# Arch Linux - pacman + yay
-# ============================================================
-
-# 防呆：禁止以 root 身份运行（makepkg 编译 yay 会拒绝执行）
 if [ "$EUID" -eq 0 ]; then
-    echo "ERROR: 请勿直接以 root 用户运行，请使用带有 sudo 权限的普通用户执行！" >&2
+    echo "ERROR: 请勿直接以 root 用户运行！" >&2
     exit 1
 fi
 
-# 先执行完整系统升级并安装基础依赖与运行时，避免部分升级（Partial Upgrade）冲突
+# zoxide 与 atuin 均在 Arch 官方仓库中，无需编译 yay
 sudo pacman -Syu --noconfirm --needed \
     git curl wget unzip zip tar base-devel openssh \
     zsh tmux neovim \
     nodejs npm go python python-pip \
-    fzf direnv \
+    fzf zoxide atuin direnv \
     ripgrep fd bat eza \
-    htop jq \
-    pass gnupg \
-    github-cli
+    htop jq pass gnupg github-cli
 
-# 确保 yay 已安装（AUR helper）
-if ! command -v yay &>/dev/null; then
-    echo "安装 yay..."
-    rm -rf /tmp/yay
-    git clone https://aur.archlinux.org/yay.git /tmp/yay
-    (cd /tmp/yay && makepkg -si --noconfirm)
-    rm -rf /tmp/yay
+# fasd 直接源码安装（纯 Shell 脚本，1 秒完成）
+if ! command -v fasd &>/dev/null; then
+    rm -rf /tmp/fasd
+    git clone --depth=1 https://github.com/clvv/fasd.git /tmp/fasd
+    sudo make -C /tmp/fasd install
+    rm -rf /tmp/fasd
 fi
 
-# AUR 包
-yay -S --noconfirm --needed \
-    zoxide \
-    atuin \
-    fasd
-
-# Powerlevel10k 主题（直接克隆，免去 AUR 编译耗时）
+# Powerlevel10k 主题直接克隆
 if [ ! -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ] && [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
-    echo "安装 Powerlevel10k..."
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 fi
 
 {{ else if .isUbuntu -}}
-# ============================================================
-# Ubuntu / WSL2 - apt + 手动安装
-# ============================================================
-
 sudo apt-get update -qq
-
-# 核心工具与语言运行时（apt 直接安装）
 sudo apt-get install -y \
-    git curl wget openssh-client locales \
-    zsh tmux \
+    git curl wget openssh-client locales zsh tmux \
     nodejs npm golang-go python3 python3-pip python3-venv \
-    fzf direnv \
-    ripgrep fd-find bat \
-    htop jq \
-    pass gnupg \
-    make build-essential \
-    unzip zip \
-    software-properties-common apt-transport-https ca-certificates
+    fzf direnv ripgrep fd-find bat htop jq pass gnupg \
+    make build-essential unzip zip software-properties-common apt-transport-https ca-certificates
 
-# fd 在 Ubuntu 里叫 fd-find，建立软链
 if ! command -v fd &>/dev/null && command -v fdfind &>/dev/null; then
-    mkdir -p "$HOME/.local/bin"
-    ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
+    mkdir -p "$HOME/.local/bin" && ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
 fi
-
-# bat 在 Ubuntu 里叫 batcat，建立软链
 if ! command -v bat &>/dev/null && command -v batcat &>/dev/null; then
-    mkdir -p "$HOME/.local/bin"
-    ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+    mkdir -p "$HOME/.local/bin" && ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
 fi
-
-# neovim - 使用官方 unstable PPA 获取最新版
 if ! command -v nvim &>/dev/null; then
-    echo "安装 neovim..."
-    sudo add-apt-repository -y ppa:neovim-ppa/unstable
-    sudo apt-get update -qq
-    sudo apt-get install -y neovim
+    sudo add-apt-repository -y ppa:neovim-ppa/unstable && sudo apt-get update -qq && sudo apt-get install -y neovim
 fi
-
-# GitHub CLI - 使用官方 apt 源
 if ! command -v gh &>/dev/null; then
-    echo "安装 GitHub CLI..."
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-        | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    sudo apt-get update -qq
-    sudo apt-get install -y gh
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt-get update -qq && sudo apt-get install -y gh
 fi
-
-# eza - 官方安装方式
 if ! command -v eza &>/dev/null; then
-    echo "安装 eza..."
-    sudo apt-get install -y gpg
     sudo mkdir -p /etc/apt/keyrings
-    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-        | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
-        | sudo tee /etc/apt/sources.list.d/gierens.list
-    sudo apt-get update -qq
-    sudo apt-get install -y eza
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+    sudo apt-get update -qq && sudo apt-get install -y eza
 fi
-
-# zoxide - 官方安装脚本
 if ! command -v zoxide &>/dev/null; then
-    echo "安装 zoxide..."
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o /tmp/install_zoxide.sh
-    bash /tmp/install_zoxide.sh
-    rm -f /tmp/install_zoxide.sh
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 fi
-
-# atuin - 官方安装脚本
 if ! command -v atuin &>/dev/null; then
-    echo "安装 atuin..."
-    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh -o /tmp/install_atuin.sh
-    bash /tmp/install_atuin.sh
-    rm -f /tmp/install_atuin.sh
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | bash
 fi
-
-# fasd - 从源码安装
 if ! command -v fasd &>/dev/null; then
-    echo "安装 fasd..."
-    rm -rf /tmp/fasd
-    git clone https://github.com/clvv/fasd.git /tmp/fasd
-    sudo make -C /tmp/fasd install
-    rm -rf /tmp/fasd
+    rm -rf /tmp/fasd && git clone --depth=1 https://github.com/clvv/fasd.git /tmp/fasd && sudo make -C /tmp/fasd install && rm -rf /tmp/fasd
 fi
-
-# Powerlevel10k 主题克隆兜底
 if [ ! -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ] && [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
-    echo "安装 Powerlevel10k..."
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 fi
 
 {{ else if .isDebian -}}
-# ============================================================
-# Debian - apt + 手动安装（无 PPA，直接用官方源）
-# ============================================================
-
 sudo apt-get update -qq
-
-# 核心工具与语言运行时（apt 直接安装）
 sudo apt-get install -y \
-    git curl wget openssh-client locales \
-    zsh tmux neovim \
+    git curl wget openssh-client locales zsh tmux neovim \
     nodejs npm golang-go python3 python3-pip python3-venv \
-    fzf direnv \
-    ripgrep fd-find bat \
-    htop jq \
-    pass gnupg \
-    make build-essential \
-    unzip zip \
-    apt-transport-https ca-certificates
+    fzf direnv ripgrep fd-find bat htop jq pass gnupg \
+    make build-essential unzip zip apt-transport-https ca-certificates
 
-# fd → fd-find 软链
 if ! command -v fd &>/dev/null && command -v fdfind &>/dev/null; then
-    mkdir -p "$HOME/.local/bin"
-    ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
+    mkdir -p "$HOME/.local/bin" && ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
 fi
-
-# bat → batcat 软链
 if ! command -v bat &>/dev/null && command -v batcat &>/dev/null; then
-    mkdir -p "$HOME/.local/bin"
-    ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
+    mkdir -p "$HOME/.local/bin" && ln -sf "$(which batcat)" "$HOME/.local/bin/bat"
 fi
-
-# GitHub CLI - 官方 apt 源
 if ! command -v gh &>/dev/null; then
-    echo "安装 GitHub CLI..."
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-        | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    sudo apt-get update -qq
-    sudo apt-get install -y gh
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt-get update -qq && sudo apt-get install -y gh
 fi
-
-# eza - 官方 deb 源
 if ! command -v eza &>/dev/null; then
-    echo "安装 eza..."
-    sudo apt-get install -y gpg
     sudo mkdir -p /etc/apt/keyrings
-    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-        | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
-        | sudo tee /etc/apt/sources.list.d/gierens.list
-    sudo apt-get update -qq
-    sudo apt-get install -y eza
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+    sudo apt-get update -qq && sudo apt-get install -y eza
 fi
-
-# zoxide - 官方安装脚本
 if ! command -v zoxide &>/dev/null; then
-    echo "安装 zoxide..."
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh -o /tmp/install_zoxide.sh
-    bash /tmp/install_zoxide.sh
-    rm -f /tmp/install_zoxide.sh
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 fi
-
-# atuin - 官方安装脚本
 if ! command -v atuin &>/dev/null; then
-    echo "安装 atuin..."
-    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh -o /tmp/install_atuin.sh
-    bash /tmp/install_atuin.sh
-    rm -f /tmp/install_atuin.sh
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | bash
 fi
-
-# fasd - 从源码安装（AUR 以外唯一方式）
 if ! command -v fasd &>/dev/null; then
-    echo "安装 fasd..."
-    rm -rf /tmp/fasd
-    git clone https://github.com/clvv/fasd.git /tmp/fasd
-    sudo make -C /tmp/fasd install
-    rm -rf /tmp/fasd
+    rm -rf /tmp/fasd && git clone --depth=1 https://github.com/clvv/fasd.git /tmp/fasd && sudo make -C /tmp/fasd install && rm -rf /tmp/fasd
 fi
-
-# Powerlevel10k 主题克隆兜底
 if [ ! -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ] && [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ]; then
-    echo "安装 Powerlevel10k..."
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 fi
 
 {{ else -}}
-echo "ERROR: 不支持的操作系统，请手动安装依赖包" >&2
+echo "ERROR: 不支持的操作系统" >&2
 exit 1
 {{ end -}}
 
 {{ if not .isMac -}}
-# 确保 en_US.UTF-8 locale 已生成（解决精简容器或云主机 LC_ALL 警告）
 if [ -f /etc/locale.gen ] && ! locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
-    echo "生成 en_US.UTF-8 locale..."
     sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
     sudo locale-gen
 fi
