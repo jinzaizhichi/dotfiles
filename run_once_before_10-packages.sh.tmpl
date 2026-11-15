@@ -21,17 +21,17 @@ if ! command -v brew &>/dev/null; then
     fi
 fi
 
-# 安装核心工具
+# 安装核心工具与语言运行时（支撑 Mason LSP/Formatter）
 brew install \
     git curl wget unzip \
     zsh tmux neovim powerlevel10k \
+    node go python pyenv \
     fzf zoxide direnv \
     atuin fasd \
     ripgrep fd bat eza \
     htop jq \
     pass gnupg \
-    gh \
-    pyenv
+    gh
 
 {{ else if .isArch -}}
 # ============================================================
@@ -44,10 +44,11 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
-# 先执行完整系统升级并安装基础依赖，避免部分升级（Partial Upgrade）冲突
+# 先执行完整系统升级并安装基础依赖与运行时，避免部分升级（Partial Upgrade）冲突
 sudo pacman -Syu --noconfirm --needed \
     git curl wget unzip zip tar base-devel openssh \
     zsh tmux neovim \
+    nodejs npm go python python-pip \
     fzf direnv \
     ripgrep fd bat eza \
     htop jq \
@@ -82,10 +83,11 @@ fi
 
 sudo apt-get update -qq
 
-# 核心工具（apt 直接安装）
+# 核心工具与语言运行时（apt 直接安装）
 sudo apt-get install -y \
     git curl wget openssh-client locales \
     zsh tmux \
+    nodejs npm golang-go python3 python3-pip python3-venv \
     fzf direnv \
     ripgrep fd-find bat \
     htop jq \
@@ -176,10 +178,11 @@ fi
 
 sudo apt-get update -qq
 
-# 核心工具（apt 直接安装）
+# 核心工具与语言运行时（apt 直接安装）
 sudo apt-get install -y \
     git curl wget openssh-client locales \
     zsh tmux neovim \
+    nodejs npm golang-go python3 python3-pip python3-venv \
     fzf direnv \
     ripgrep fd-find bat \
     htop jq \
