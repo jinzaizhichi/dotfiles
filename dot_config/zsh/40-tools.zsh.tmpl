@@ -140,6 +140,7 @@ _lazy_load_pyenv() {
     unset -f pyenv python python3 pip pip3
     eval "$(command pyenv init -)"
 }
+unalias python pip 2>/dev/null || true
 for _cmd in pyenv python python3 pip pip3; do
     eval "${_cmd}() { _lazy_load_pyenv; ${_cmd} \"\$@\"; }"
 done

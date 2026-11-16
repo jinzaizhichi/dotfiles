@@ -39,7 +39,7 @@ plugins=(
 
 # 加载 Oh My Zsh
 # 提前设置 LS_COLORS，绕过 WSL2 下 source <(dircolors) 的 /proc/self/fd 报错
-[[ -z "$LS_COLORS" ]] && eval $(dircolors -b)
+[[ -z "$LS_COLORS" ]] && command -v dircolors >/dev/null && eval $(dircolors -b)
 unalias colors 2>/dev/null  # 防止自定义 colors alias 干扰 OMZ 初始化
 
 if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
