@@ -21,7 +21,7 @@ if ! command -v brew &>/dev/null; then
 fi
 brew install \
     git curl wget unzip zsh tmux neovim powerlevel10k \
-    node go python pyenv fzf zoxide direnv atuin fasd \
+    node go python pyenv fzf zoxide direnv atuin \
     ripgrep fd bat eza htop jq pass gnupg gh
 
 {{ else if .isArch -}}
