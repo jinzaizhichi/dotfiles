@@ -4,7 +4,7 @@
 # 编辑方式: chezmoi edit ~/.zshrc
 # ============================================
 #
-# 系统: {{ .chezmoi.os }}/{{ .chezmoi.osRelease.id | default "unknown" }}
+# 系统: {{ .chezmoi.os }}/{{ dig "id" "unknown" .chezmoi.osRelease }}
 # 用户: {{ .name }}
 #
 # ============================================
