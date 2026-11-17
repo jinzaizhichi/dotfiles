@@ -120,3 +120,6 @@ if command -v keychain &>/dev/null && [[ -f "$HOME/.ssh/id_ed25519" ]]; then
     eval "$(keychain --eval --quiet id_ed25519)"
 fi
 
+{{- if eq .chezmoi.os "darwin" }}
+export GPG_TTY=$(tty)
+{{- end }}
